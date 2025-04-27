@@ -1,0 +1,381 @@
+Lecture_11/
+├── External_Sorting
+│   ├── Explanation:
+│   │   External Sorting is a technique used when the dataset is too large to fit into main memory.
+│   │   It follows a **Divide and Conquer** approach by breaking data into manageable chunks,
+│   │   sorting them individually, and then merging them into a single sorted output.
+│   │
+│   │   It operates in **two phases**:
+│   │   1. **Sorting Phase**: Divide data into 'runs', sort each run in memory, and store back to disk.
+│   │   2. **Merging Phase**: Iteratively merge sorted runs until a single sorted file remains.
+│   │
+│   │   ---
+│   ├── Algorithm_Steps:
+│   │   1. Partition the large dataset into chunks that fit in memory.
+│   │   2. Sort each chunk using an in-memory algorithm (like quicksort).
+│   │   3. Write each sorted chunk back to disk as a "run".
+│   │   4. Use multi-way merge to combine runs:
+│   │      - Load one block from each run into memory.
+│   │      - Repeatedly select the smallest element and write to output buffer.
+│   │      - Refill buffers as needed until all runs are merged.
+│   │
+│   │   ---
+│   ├── Visualization:
+│   │   Assume: 1 TB data, 1 GB memory.
+│   │
+│   │   Step 1: **Sorting Phase**
+│   │   [Disk]
+│   │   ┌───────────────┐
+│   │   │ 1 TB Unsorted │
+│   │   └───────────────┘
+│   │        │  Divide into 1 GB chunks
+│   │        ▼
+│   │   [Memory] --Sort--> [Disk]
+│   │   ┌────────┐         ┌────────┐
+│   │   │ 1 GB   │  --->   │ Run 1  │
+│   │   └────────┘         └────────┘
+│   │   Repeat → Run 2, Run 3, ..., Run 1024
+│   │
+│   │   Step 2: **Merging Phase**
+│   │   Load 1 block from each run:
+│   │   ┌────┐ ┌────┐ ┌────┐
+│   │   │R1  │ │R2  │ ...  │Rn │
+│   │   └────┘ └────┘ └────┘
+│   │        │   Multi-way Merge
+│   │        ▼
+│   │   ┌───────────────┐
+│   │   │ Sorted Output │
+│   │   └───────────────┘
+│   │
+│   │   ---
+│   ├── Sample_Input_Run:
+│   │   Dataset: [45, 12, 89, 33, 76, 22, 10, 5]  (Assume memory holds 3 numbers)
+│   │
+│   │   **Sorting Phase**:
+│   │   - Chunk 1: [45, 12, 89] → sort → [12, 45, 89] → Run1
+│   │   - Chunk 2: [33, 76, 22] → sort → [22, 33, 76] → Run2
+│   │   - Chunk 3: [10, 5]      → sort → [5, 10]     → Run3
+│   │
+│   │   **Merging Phase**:
+│   │   Initial Buffers:
+│   │   Run1: [12, 45, 89]
+│   │   Run2: [22, 33, 76]
+│   │   Run3: [5, 10]
+│   │
+│   ├── Output Steps:
+│   │   1. Select Min: 5   → Output: [5]
+│   │   2. Select Min: 10  → Output: [5, 10]
+│   │   3. Select Min: 12  → Output: [5, 10, 12]
+│   │   4. Continue...     → Final Output: [5, 10, 12, 22, 33, 45, 76, 89]
+│   │
+│   │   ---
+│   ├── IO_Cost_Analysis:
+│   │   - Each block is read and written once in the sorting phase.
+│   │   - In merging, each pass reads and writes all data.
+│   │   - Total IO Cost = 2 * N * (1 + ⌈logₖ N⌉)
+│   │     Where:
+│   │       N = Number of blocks
+│   │       k = Number of runs merged at once (depends on available memory)
+│   │
+│   ├── Example:
+│   │   For 7 blocks, 2-way merge:
+│   │   Total Passes = 1 (sort) + ⌈log₂ 7⌉ = 1 + 3 = 4
+│   │   IO Cost = 2 * 7 * 4 = 56 IOs
+│   │
+│   │   ---
+│   └── Related_Concepts/
+│       ├── Runs
+│       │   └── Explanation: A "run" is a sorted chunk of data written back to disk during the sorting phase.
+│       ├── Buffer_Pages
+│       │   └── Explanation: Memory pages used to load parts of runs during the merge phase.
+│       └── Multi_Way_Merge
+│           └── Explanation: A merging strategy where multiple sorted runs are merged simultaneously to minimize passes.
+├── External_Sorting
+│   ├── Explanation:
+│   │   External Sorting is a technique used when the dataset is too large to fit into main memory.
+│   │   It follows a **Divide and Conquer** approach by breaking data into manageable chunks,
+│   │   sorting them individually, and then merging them into a single sorted output.
+│   │
+│   │   It operates in **two phases**:
+│   │   1. **Sorting Phase**: Divide data into 'runs', sort each run in memory, and store back to disk.
+│   │   2. **Merging Phase**: Iteratively merge sorted runs until a single sorted file remains.
+│   │
+│   │   ---
+│   ├── Algorithm_Steps:
+│   │   1. Partition the large dataset into chunks that fit in memory.
+│   │   2. Sort each chunk using an in-memory algorithm (like quicksort).
+│   │   3. Write each sorted chunk back to disk as a "run".
+│   │   4. Use multi-way merge to combine runs:
+│   │      - Load one block from each run into memory.
+│   │      - Repeatedly select the smallest element and write to output buffer.
+│   │      - Refill buffers as needed until all runs are merged.
+│   │
+│   │   ---
+│   ├── Visualization:
+│   │   Assume: 1 TB data, 1 GB memory.
+│   │
+│   │   Step 1: **Sorting Phase**
+│   │   [Disk]
+│   │   ┌───────────────┐
+│   │   │ 1 TB Unsorted │
+│   │   └───────────────┘
+│   │        │  Divide into 1 GB chunks
+│   │        ▼
+│   │   [Memory] --Sort--> [Disk]
+│   │   ┌────────┐         ┌────────┐
+│   │   │ 1 GB   │  --->   │ Run 1  │
+│   │   └────────┘         └────────┘
+│   │   Repeat → Run 2, Run 3, ..., Run 1024
+│   │
+│   │   Step 2: **Merging Phase**
+│   │   Load 1 block from each run:
+│   │   ┌────┐ ┌────┐ ┌────┐
+│   │   │R1  │ │R2  │ ...  │Rn │
+│   │   └────┘ └────┘ └────┘
+│   │        │   Multi-way Merge
+│   │        ▼
+│   │   ┌───────────────┐
+│   │   │ Sorted Output │
+│   │   └───────────────┘
+│   │
+│   │   ---
+│   ├── Sample_Input_Run:
+│   │   Dataset: [45, 12, 89, 33, 76, 22, 10, 5]  (Assume memory holds 3 numbers)
+│   │
+│   │   **Sorting Phase**:
+│   │   - Chunk 1: [45, 12, 89] → sort → [12, 45, 89] → Run1
+│   │   - Chunk 2: [33, 76, 22] → sort → [22, 33, 76] → Run2
+│   │   - Chunk 3: [10, 5]      → sort → [5, 10]     → Run3
+│   │
+│   │   **Merging Phase**:
+│   │   Initial Buffers:
+│   │   Run1: [12, 45, 89]
+│   │   Run2: [22, 33, 76]
+│   │   Run3: [5, 10]
+│   │
+│   ├── Output Steps:
+│   │   1. Select Min: 5   → Output: [5]
+│   │   2. Select Min: 10  → Output: [5, 10]
+│   │   3. Select Min: 12  → Output: [5, 10, 12]
+│   │   4. Continue...     → Final Output: [5, 10, 12, 22, 33, 45, 76, 89]
+│   │
+│   │   ---
+│   ├── IO_Cost_Analysis:
+│   │   - Each block is read and written once in the sorting phase.
+│   │   - In merging, each pass reads and writes all data.
+│   │   - Total IO Cost = 2 * N * (1 + ⌈logₖ N⌉)
+│   │     Where:
+│   │       N = Number of blocks
+│   │       k = Number of runs merged at once (depends on available memory)
+│   │
+│   ├── Example:
+│   │   For 7 blocks, 2-way merge:
+│   │   Total Passes = 1 (sort) + ⌈log₂ 7⌉ = 1 + 3 = 4
+│   │   IO Cost = 2 * 7 * 4 = 56 IOs
+│   │
+│   │   ---
+│   └── Related_Concepts/
+│       ├── Runs
+│       │   └── Explanation: A "run" is a sorted chunk of data written back to disk during the sorting phase.
+│       ├── Buffer_Pages
+│       │   └── Explanation: Memory pages used to load parts of runs during the merge phase.
+│       └── Multi_Way_Merge
+│           └── Explanation: A merging strategy where multiple sorted runs are merged simultaneously to minimize passes.
+├── Query_Execution
+│   ├── Nested_Loop_Join
+│   │   ├── Explanation:
+│   │   │   The **Nested Loop Join (NLJ)** iterates through each tuple of the outer table (R)
+│   │   │   and compares it with every tuple of the inner table (S). It's simple but inefficient for large datasets.
+│   │   │
+│   │   ├── Algorithm_Steps:
+│   │   │   1. Load (M-2) blocks of R into memory.
+│   │   │   2. For each block of S:
+│   │   │      - Compare tuples based on join condition.
+│   │   │      - Store matching results in output buffer.
+│   │   │
+│   │   ├── Visualization:
+│   │   │   Memory Layout (M = 102 pages):
+│   │   │   ┌────────────┬──────────┬───────────────┐
+│   │   │   │ 100 Pages  │ 1 Page   │ 1 Page        │
+│   │   │   │  for R     │  for S   │ Output Buffer │
+│   │   │   └────────────┴──────────┴───────────────┘
+│   │   │
+│   │   ├── Sample_Input_Run:
+│   │   │   R = [1, 2, 3], S = [2, 3, 4], Join: R.id = S.id
+│   │   │   Output: [2, 3]
+│   │   │
+│   │   ├── IO_Cost_Analysis:
+│   │   │   Total Cost = ⌈P(R)/(M-2)⌉ * P(S) + P(R)
+│   │   │
+│   │   └── Related_Concepts/
+│   │       ├── Block_Nested_Loop
+│   │       ├── Output_Buffer
+│   │       └── Join_Condition
+│   │
+│   ├── Sort_Merge_Join
+│   │   ├── Explanation:
+│   │   │   Efficient for sorted datasets. It merges two sorted tables by scanning them linearly.
+│   │   │
+│   │   ├── Algorithm_Steps:
+│   │   │   1. Sort both tables on join key (if not sorted).
+│   │   │   2. Merge by comparing current tuples.
+│   │   │
+│   │   ├── Visualization:
+│   │   │   R: [1, 2, 3, 5]
+│   │   │   S: [2, 3, 4, 5]
+│   │   │   Output: [2, 3, 5]
+│   │   │
+│   │   ├── Sample_Input_Run:
+│   │   │   Unsorted → Sort → Merge → Output
+│   │   │
+│   │   ├── IO_Cost_Analysis:
+│   │   │   If sorted: P(R) + P(S)
+│   │   │   If unsorted: Add sorting cost.
+│   │   │
+│   │   └── Related_Concepts/
+│   │       ├── External_Sorting
+│   │       ├── Merge_Process
+│   │       └── Duplicate_Handling
+│   │
+│   └── Hash_Join
+│       ├── Explanation:
+│       │   Uses hashing to partition data for efficient joins, ideal for equi-joins.
+│       │
+│       ├── Algorithm_Steps:
+│       │   1. **Build Phase**: Hash smaller table (R) into memory.
+│       │   2. **Probe Phase**: Hash tuples from S and match.
+│       │
+│       ├── Visualization:
+│       │   Build hash table from R, probe with S.
+│       │
+│       ├── Sample_Input_Run:
+│       │   R = [2, 5, 7], S = [1, 2, 5, 9] → Output: [2, 5]
+│       │
+│       ├── IO_Cost_Analysis:
+│       │   - Simple Hash Join: P(R) + P(S)
+│       │   - Grace Hash Join: ≈ 3 * (P(R) + P(S))
+│       │
+│       └── Related_Concepts/
+│           ├── Grace_Hash_Join
+│           ├── Hash_Function
+│           └── Skew_Handling
+├── NoSQL_and_Amazon_DynamoDB
+│   ├── Explanation:
+│   │   **NoSQL** databases are designed for flexible, scalable handling of large volumes of data.
+│   │   They break away from rigid relational schemas to support modern applications.
+│   │
+│   │   **Amazon DynamoDB** is a fully managed NoSQL key-value and document database,
+│   │   optimized for high availability, low latency, and seamless scalability.
+│   │
+│   ├── Key_Features_of_NoSQL:
+│   │   - Schema-less design
+│   │   - Horizontal scalability
+│   │   - Distributed, fault-tolerant architecture
+│   │   - Supports key-value, document, column-family, and graph models
+│   │
+│   ├── Core_Concepts:
+│   │   - **Table**, **Item**, **Attribute**
+│   │   - **Primary Key**: Partition Key or Composite (Partition + Sort Key)
+│   │   - Consistency: Eventually Consistent vs Strongly Consistent Reads
+│   │
+│   ├── Visualization:
+│   │   Example DynamoDB Table: Users
+│   │   ┌──────────────┬────────────┬──────────────┐
+│   │   │ UserID (PK)  │  Name      │   City       │
+│   │   ├──────────────┼────────────┼──────────────┤
+│   │   │    U123      │  Alice     │  New York    │
+│   │   │    U456      │  Bob       │  Chicago     │
+│   │   └──────────────┴────────────┴──────────────┘
+│   │
+│   ├── Example_Code:
+│   │   ```python
+│   │   import boto3
+│   │   table = boto3.resource('dynamodb').Table('Users')
+│   │   response = table.get_item(Key={'UserID': 'U123'})
+│   │   print(response['Item'])
+│   │   ```
+│   │
+│   ├── Dry_Run:
+│   │   Input: Get item where UserID = 'U123'
+│   │   Output: { 'UserID': 'U123', 'Name': 'Alice', 'City': 'New York' }
+│   │
+│   ├── Consistency_Model:
+│   │   - **Eventually Consistent**: Faster, but may not reflect latest writes.
+│   │   - **Strongly Consistent**: Guarantees latest data with slightly higher latency.
+│   │
+│   └── Related_Concepts/
+│       ├── CAP_Theorem
+│       │   └── Explanation: [External Standard Explanation]
+│       │       A distributed system can only guarantee two of: Consistency, Availability, Partition Tolerance.
+│       ├── Partition_Key
+│       ├── Auto_Scaling
+│       └── Global_Secondary_Index
+├── Hadoop_and_MapReduce
+│   ├── Explanation:
+│   │   **Hadoop** is a framework for distributed storage (HDFS) and processing of big data across clusters.
+│   │   It enables fault-tolerant, scalable data handling.
+│   │
+│   │   **MapReduce** is Hadoop’s core data processing model, designed to handle parallel computation
+│   │   by splitting tasks into independent units.
+│   │
+│   ├── MapReduce_Model:
+│   │   1. **Map Phase**: Transform input data into key-value pairs.
+│   │   2. **Shuffle & Sort Phase**: Group data by key across nodes.
+│   │   3. **Reduce Phase**: Aggregate values for each key to produce final output.
+│   │
+│   ├── Algorithm_Steps:
+│   │   1. Input Splitting
+│   │   2. Mapping
+│   │   3. Shuffling and Sorting
+│   │   4. Reducing
+│   │
+│   ├── Visualization:
+│   │   Task: Word Count Example
+│   │
+│   │   Input: "hi hadoop hi data"
+│   │
+│   │   Map Phase Output:
+│   │     ('hi',1), ('hadoop',1), ('hi',1), ('data',1)
+│   │
+│   │   Shuffle & Sort:
+│   │     ('data', [1])
+│   │     ('hadoop', [1])
+│   │     ('hi', [1,1])
+│   │
+│   │   Reduce Phase Output:
+│   │     ('data',1), ('hadoop',1), ('hi',2)
+│   │
+│   ├── Example_Code:
+│   │   ```python
+│   │   # mapper.py
+│   │   for word in line.strip().split():
+│   │       print(f"{word}\t1")
+│   │   ```
+│   │
+│   │   ```python
+│   │   # reducer.py
+│   │   word_count[word] += int(count)
+│   │   print(f"{word}\t{word_count[word]}")
+│   │   ```
+│   │
+│   ├── Dry_Run:
+│   │   Input: "big data big hadoop"
+│   │   - Mapper Output: ('big',1), ('data',1), ('big',1), ('hadoop',1)
+│   │   - Shuffle & Sort: ('big', [1,1]), ('data', [1]), ('hadoop', [1])
+│   │   - Reducer Output: ('big',2), ('data',1), ('hadoop',1)
+│   │
+│   ├── HDFS_Concepts:
+│   │   - Data split into large blocks (128MB default)
+│   │   - Blocks replicated across nodes for fault tolerance
+│   │
+│   ├── IO_Cost_Considerations:
+│   │   - Heavy IO during shuffle phase
+│   │   - Minimize intermediate data for efficiency
+│   │
+│   └── Related_Concepts/
+│       ├── YARN
+│       │   └── Explanation: Hadoop’s resource manager for job scheduling.
+│       ├── Combiner
+│       │   └── Explanation: Local aggregation to reduce shuffle data.
+│       ├── Fault_Tolerance
+│       └── Distributed_Computing
