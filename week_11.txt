@@ -310,72 +310,72 @@ Lecture_11/
 │       ├── Partition_Key
 │       ├── Auto_Scaling
 │       └── Global_Secondary_Index
-├── Hadoop_and_MapReduce
-│   ├── Explanation:
-│   │   **Hadoop** is a framework for distributed storage (HDFS) and processing of big data across clusters.
-│   │   It enables fault-tolerant, scalable data handling.
-│   │
-│   │   **MapReduce** is Hadoop’s core data processing model, designed to handle parallel computation
-│   │   by splitting tasks into independent units.
-│   │
-│   ├── MapReduce_Model:
-│   │   1. **Map Phase**: Transform input data into key-value pairs.
-│   │   2. **Shuffle & Sort Phase**: Group data by key across nodes.
-│   │   3. **Reduce Phase**: Aggregate values for each key to produce final output.
-│   │
-│   ├── Algorithm_Steps:
-│   │   1. Input Splitting
-│   │   2. Mapping
-│   │   3. Shuffling and Sorting
-│   │   4. Reducing
-│   │
-│   ├── Visualization:
-│   │   Task: Word Count Example
-│   │
-│   │   Input: "hi hadoop hi data"
-│   │
-│   │   Map Phase Output:
-│   │     ('hi',1), ('hadoop',1), ('hi',1), ('data',1)
-│   │
-│   │   Shuffle & Sort:
-│   │     ('data', [1])
-│   │     ('hadoop', [1])
-│   │     ('hi', [1,1])
-│   │
-│   │   Reduce Phase Output:
-│   │     ('data',1), ('hadoop',1), ('hi',2)
-│   │
-│   ├── Example_Code:
-│   │   ```python
-│   │   # mapper.py
-│   │   for word in line.strip().split():
-│   │       print(f"{word}\t1")
-│   │   ```
-│   │
-│   │   ```python
-│   │   # reducer.py
-│   │   word_count[word] += int(count)
-│   │   print(f"{word}\t{word_count[word]}")
-│   │   ```
-│   │
-│   ├── Dry_Run:
-│   │   Input: "big data big hadoop"
-│   │   - Mapper Output: ('big',1), ('data',1), ('big',1), ('hadoop',1)
-│   │   - Shuffle & Sort: ('big', [1,1]), ('data', [1]), ('hadoop', [1])
-│   │   - Reducer Output: ('big',2), ('data',1), ('hadoop',1)
-│   │
-│   ├── HDFS_Concepts:
-│   │   - Data split into large blocks (128MB default)
-│   │   - Blocks replicated across nodes for fault tolerance
-│   │
-│   ├── IO_Cost_Considerations:
-│   │   - Heavy IO during shuffle phase
-│   │   - Minimize intermediate data for efficiency
-│   │
-│   └── Related_Concepts/
-│       ├── YARN
-│       │   └── Explanation: Hadoop’s resource manager for job scheduling.
-│       ├── Combiner
-│       │   └── Explanation: Local aggregation to reduce shuffle data.
-│       ├── Fault_Tolerance
-│       └── Distributed_Computing
+└── Hadoop_and_MapReduce
+    ├── Explanation:
+    │   **Hadoop** is a framework for distributed storage (HDFS) and processing of big data across clusters.
+    │   It enables fault-tolerant, scalable data handling.
+    │
+    │   **MapReduce** is Hadoop’s core data processing model, designed to handle parallel computation
+    │   by splitting tasks into independent units.
+    │
+    ├── MapReduce_Model:
+    │   1. **Map Phase**: Transform input data into key-value pairs.
+    │   2. **Shuffle & Sort Phase**: Group data by key across nodes.
+    │   3. **Reduce Phase**: Aggregate values for each key to produce final output.
+    │
+    ├── Algorithm_Steps:
+    │   1. Input Splitting
+    │   2. Mapping
+    │   3. Shuffling and Sorting
+    │   4. Reducing
+    │
+    ├── Visualization:
+    │   Task: Word Count Example
+    │
+    │   Input: "hi hadoop hi data"
+    │
+    │   Map Phase Output:
+    │     ('hi',1), ('hadoop',1), ('hi',1), ('data',1)
+    │
+    │   Shuffle & Sort:
+    │     ('data', [1])
+    │     ('hadoop', [1])
+    │     ('hi', [1,1])
+    │
+    │   Reduce Phase Output:
+    │     ('data',1), ('hadoop',1), ('hi',2)
+    │
+    ├── Example_Code:
+    │   ```python
+    │   # mapper.py
+    │   for word in line.strip().split():
+    │       print(f"{word}\t1")
+    │   ```
+    │
+    │   ```python
+    │   # reducer.py
+    │   word_count[word] += int(count)
+    │   print(f"{word}\t{word_count[word]}")
+    │   ```
+    │
+    ├── Dry_Run:
+    │   Input: "big data big hadoop"
+    │   - Mapper Output: ('big',1), ('data',1), ('big',1), ('hadoop',1)
+    │   - Shuffle & Sort: ('big', [1,1]), ('data', [1]), ('hadoop', [1])
+    │   - Reducer Output: ('big',2), ('data',1), ('hadoop',1)
+    │
+    ├── HDFS_Concepts:
+    │   - Data split into large blocks (128MB default)
+    │   - Blocks replicated across nodes for fault tolerance
+    │
+    ├── IO_Cost_Considerations:
+    │   - Heavy IO during shuffle phase
+    │   - Minimize intermediate data for efficiency
+    │
+    └── Related_Concepts/
+        ├── YARN
+        │   └── Explanation: Hadoop’s resource manager for job scheduling.
+        ├── Combiner
+        │   └── Explanation: Local aggregation to reduce shuffle data.
+        ├── Fault_Tolerance
+        └── Distributed_Computing

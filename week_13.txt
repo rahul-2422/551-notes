@@ -382,7 +382,7 @@ Lecture_13_Spark_RDD_Indexing/
 │   │       OLAP:  Analyst → Complex SELECT → Data Warehouse
 │   │       ```
 │
-│       Summary Table:
+│   └── Summary Table:
 │       ```
 │       | Type           | Best For        | Weakness            |
 │       |----------------|-----------------|---------------------|
@@ -393,13 +393,13 @@ Lecture_13_Spark_RDD_Indexing/
 │       ```
 │
 │
-├── Key_Jargon
-│   ├── Index: Data structure to speed up retrieval.
-│   ├── Clustered_Index: Index where data is physically ordered.
-│   ├── Unclustered_Index: Separate index structure pointing to data.
-│   ├── BPlus_Tree: Balanced tree structure used in databases.
-│   ├── Hash_Index: Index using hash functions for quick lookups.
-│   ├── Leaf_Node: Bottom level of B+ Tree holding actual data pointers.
-│   ├── Internal_Node: Navigational node in B+ Tree.
-│   ├── Hash_Collision: Two keys mapping to the same hash bucket.
-│   └── Data_Shuffling: Movement of data across nodes/partitions (relevant in distributed indexing).
+└── Key_Jargon
+    ├── Index: Data structure to speed up retrieval.
+    ├── Clustered_Index: Index where data is physically ordered.
+    ├── Unclustered_Index: Separate index structure pointing to data.
+    ├── BPlus_Tree: Balanced tree structure used in databases.
+    ├── Hash_Index: Index using hash functions for quick lookups.
+    ├── Leaf_Node: Bottom level of B+ Tree holding actual data pointers.
+    ├── Internal_Node: Navigational node in B+ Tree.
+    ├── Hash_Collision: Two keys mapping to the same hash bucket.
+    └── Data_Shuffling: Movement of data across nodes/partitions (relevant in distributed indexing).
