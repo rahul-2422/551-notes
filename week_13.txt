@@ -1,0 +1,405 @@
+Lecture_13_Spark_RDD_Indexing/
+├── Spark_RDD
+│   └── Explanation:
+│       Resilient Distributed Dataset (RDD) is the fundamental data structure of Apache Spark.
+│       It represents an immutable, distributed collection of objects that can be processed in parallel.
+│
+│       - **Resilient**: Fault-tolerant through lineage (recomputing lost data).
+│       - **Distributed**: Data is split across multiple nodes in a cluster.
+│       - **Dataset**: A collection of records (like lists, but distributed).
+│
+│       RDDs support two types of operations:
+│       1. **Transformations** (e.g., `map`, `filter`): Define a new RDD.
+│       2. **Actions** (e.g., `collect`, `count`): Trigger computation and return results.
+│
+│       Spark uses **lazy evaluation**, meaning transformations are not executed until an action is called.
+│
+│
+├── RDD_Creation
+│   └── Explanation:
+│       RDDs can be created from:
+│       - Existing collections (e.g., Python lists).
+│       - External data sources (e.g., HDFS, S3, local files).
+│
+│       Example_Code:
+│       ```python
+│       data = [1, 2, 3, 4, 5, 6, 7]
+│       rdd = sc.parallelize(data, numSlices=2)
+│       ```
+│       Dry Run:
+│       Input: [1, 2, 3, 4, 5, 6, 7], numSlices=2
+│       Output Partitions:
+│       - Partition 1: [1, 2, 3]
+│       - Partition 2: [4, 5, 6, 7]
+│
+│
+├── Transformations
+│   └── Explanation:
+│       Transformations define a new RDD from an existing one. They are lazy and only computed when an action is invoked.
+│
+│       Common Transformations:
+│       - `map()`: Applies a function to each element.
+│       - `filter()`: Filters elements based on a condition.
+│       - `reduceByKey()`: Aggregates values by key.
+│
+│
+│   ├── map_Example
+│   │   └── Example_Code:
+│   │       ```python
+│   │       rdd2 = rdd.map(lambda x: x * 2)
+│   │       ```
+│   │       Dry Run:
+│   │       Input Partition 1: [1, 2, 3] → Output: [2, 4, 6]
+│   │       Input Partition 2: [4, 5, 6, 7] → Output: [8, 10, 12, 14]
+│
+│
+│   ├── filter_Example
+│   │   └── Example_Code:
+│   │       ```python
+│   │       even_rdd = rdd.filter(lambda x: x % 2 == 0)
+│   │       ```
+│   │       Dry Run:
+│   │       Input Partition 1: [1, 2, 3] → Output: [2]
+│   │       Input Partition 2: [4, 5, 6, 7] → Output: [4, 6]
+│
+│
+├── Actions
+│   └── Explanation:
+│       Actions trigger the execution of transformations and return results to the driver program.
+│
+│       Common Actions:
+│       - `collect()`: Retrieves the entire RDD content.
+│       - `count()`: Counts the number of elements.
+│       - `take(n)`: Returns the first n elements.
+│
+│   ├── collect_Example
+│   │   └── Example_Code:
+│   │       ```python
+│   │       rdd.collect()
+│   │       ```
+│   │       Dry Run:
+│   │       Output: [1, 2, 3, 4, 5, 6, 7]
+│
+│
+├── Lazy_Evaluation_and_Lineage
+│   └── Explanation:
+│       - **Lazy Evaluation**: Transformations are not executed until an action is called.
+│       - **Lineage**: Spark remembers the sequence of transformations to recompute data if needed.
+│
+│       Visualization:
+│       Step 1: rdd → filter → map → (No computation yet)
+│       Step 2: Action (`collect()`) called → Execute pipeline
+│
+│
+├── Partitioning_and_Data_Distribution
+│   └── Explanation:
+│       Data in RDDs is split into partitions, allowing parallel processing across nodes.
+│       Example: A list split into two partitions processed by two worker nodes.
+│
+│       Visualization:
+│       Data: [1, 2, 3, 4, 5, 6]
+│       Partition 1 → Worker 1: [1, 2, 3]
+│       Partition 2 → Worker 2: [4, 5, 6]
+│
+│
+├── Resilience_and_Fault_Tolerance
+│   └── Explanation:
+│       If a partition is lost, Spark uses lineage information to recompute only the lost partition.
+│
+│       Related_Concepts:
+│       └── Lineage:
+│           Spark tracks the transformation history to enable recovery.
+│
+│
+├── reduceByKey_Example
+│   └── Example_Code:
+│       ```python
+│       pairs = [('Asia', 1), ('Europe', 1), ('Asia', 1)]
+│       rdd = sc.parallelize(pairs)
+│       rdd2 = rdd.reduceByKey(lambda x, y: x + y)
+│       ```
+│       Dry Run:
+│       Input: [('Asia', 1), ('Europe', 1), ('Asia', 1)]
+│       Step 1: Group by key → {'Asia': [1, 1], 'Europe': [1]}
+│       Step 2: Sum values → {'Asia': 2, 'Europe': 1}
+│
+│
+├── Key_Jargon
+│   ├── RDD: Immutable distributed collection of objects.
+│   ├── Transformation: Operation that defines a new RDD.
+│   ├── Action: Operation that triggers computation.
+│   ├── Lazy_Evaluation: Delay computation until necessary.
+│   ├── Lineage: History of transformations for fault recovery.
+│   ├── Partition: Subset of data processed in parallel.
+│   ├── reduceByKey: Aggregation by key across partitions.
+│   ├── Fault_Tolerance: Ability to recover from failures.
+│   └── shuffle: Data redistribution across partitions (expensive operation).
+├── Aggregations_and_Grouping
+│   └── Explanation:
+│       Aggregation operations in Spark RDD allow combining values across keys or datasets.
+│       Two key methods for grouping and aggregation:
+│
+│       1. **groupByKey**:
+│          - Groups values by key but transfers all values across the network.
+│          - Expensive due to heavy **shuffling**.
+│
+│       2. **reduceByKey**:
+│          - Performs local aggregation before shuffling.
+│          - More efficient than `groupByKey`.
+│
+│       Visualization:
+│       Input: [('Asia', 1), ('Europe', 1), ('Asia', 1)]
+│
+│       groupByKey:
+│       Step 1: Shuffle → {'Asia': [1, 1], 'Europe': [1]}
+│       Step 2: Sum → {'Asia': 2, 'Europe': 1}
+│
+│       reduceByKey:
+│       Step 1: Local sum → [('Asia', 2), ('Europe', 1)]
+│       Step 2: Minimal shuffle.
+│
+│
+├── Average_Calculation_with_RDD
+│   └── Explanation:
+│       To compute averages in parallel:
+│       - Emit `(sum, count)` pairs.
+│       - Use `reduceByKey` to aggregate sums and counts separately.
+│
+│       Example_Code:
+│       ```python
+│       rdd = sc.parallelize([('Asia', 1000), ('Asia', 2000), ('Europe', 1500)])
+│       mapped = rdd.map(lambda x: (x[0], (x[1], 1)))
+│       reduced = mapped.reduceByKey(lambda a, b: (a[0] + b[0], a[1] + b[1]))
+│       averages = reduced.map(lambda x: (x[0], x[1][0] / x[1][1]))
+│       ```
+│       Dry Run:
+│       Step 1: Map → [('Asia', (1000,1)), ('Asia', (2000,1)), ('Europe', (1500,1))]
+│       Step 2: ReduceByKey → {'Asia': (3000,2), 'Europe': (1500,1)}
+│       Step 3: Map → {'Asia': 1500.0, 'Europe': 1500.0}
+│
+│
+├── Data_Shuffling_and_Repartitioning
+│   └── Explanation:
+│       - **Shuffling** occurs when data needs to move across partitions.
+│       - Operations like `reduceByKey`, `join`, and `groupByKey` trigger shuffling.
+│       - Shuffling is costly; avoid unnecessary shuffles.
+│
+│       Related_Concepts:
+│       └── Combiner:
+│           Local aggregation before shuffling to reduce data transfer.
+│
+│
+├── Joins_in_RDD
+│   └── Explanation:
+│       Joins combine two RDDs based on keys.
+│
+│       Types of Joins:
+│       - `join()`: Inner join.
+│       - `leftOuterJoin()`: Keeps all keys from the left RDD.
+│       - `rightOuterJoin()`: Keeps all keys from the right RDD.
+│       - `fullOuterJoin()`: Keeps all keys from both RDDs.
+│
+│   ├── join_Example
+│   │   └── Example_Code:
+│   │       ```python
+│   │       rdd1 = sc.parallelize([(1, 'USA'), (2, 'Canada')])
+│   │       rdd2 = sc.parallelize([(1, 'Washington'), (3, 'Paris')])
+│   │       joined = rdd1.join(rdd2)
+│   │       ```
+│   │       Dry Run:
+│   │       rdd1: {1: 'USA', 2: 'Canada'}
+│   │       rdd2: {1: 'Washington', 3: 'Paris'}
+│   │       Output: {1: ('USA', 'Washington')}
+│
+│
+├── Set_Operations
+│   └── Explanation:
+│       Spark RDD supports standard set operations:
+│       - `union()`: Combines two RDDs (duplicates kept).
+│       - `distinct()`: Removes duplicates.
+│       - `intersection()`: Common elements.
+│       - `subtract()`: Elements in one RDD but not the other.
+│
+│   ├── union_vs_distinct
+│   │   └── Example_Code:
+│   │       ```python
+│   │       rdd1 = sc.parallelize(['English', 'French'])
+│   │       rdd2 = sc.parallelize(['French', 'Spanish'])
+│   │       union_rdd = rdd1.union(rdd2)
+│   │       distinct_rdd = union_rdd.distinct()
+│   │       ```
+│   │       Dry Run:
+│   │       union_rdd: ['English', 'French', 'French', 'Spanish']
+│   │       distinct_rdd: ['English', 'French', 'Spanish']
+│
+│
+├── Common_Table_Expressions_(CTE)_in_Spark
+│   └── Explanation:
+│       A CTE is a temporary result set used in SQL queries.
+│       In Spark, similar logic is implemented by storing intermediate RDD transformations.
+│
+│       Example:
+│       ```python
+│       t = rdd.map(...).reduceByKey(...)
+│       result = t.filter(...).map(...)
+│       ```
+│
+│
+├── Final_Insights_on_Parallel_Processing
+│   └── Explanation:
+│       - **Map**: Parallel, no shuffling.
+│       - **ReduceByKey / Join**: Parallel with shuffling.
+│       - **Filter**: Parallel, no shuffling.
+│       - Optimize by minimizing shuffling.
+│
+│       Visualization:
+│       ```
+│       Data Load → Map → Filter → ReduceByKey → Action
+│                   (No Shuffle)   (Shuffle)     (Trigger)
+│       ```
+│
+│       Related_Concepts:
+│       └── Lazy_Evaluation:
+│           Transformations are queued until an action demands execution.
+├── Indexing
+│   └── Explanation:
+│       Indexing is a database optimization technique that improves the speed of data retrieval.
+│       An index is a data structure (like a sorted list or tree) that allows quick lookup of records.
+│
+│       Without indexes, databases perform **full table scans**, which are inefficient for large datasets.
+│
+│
+├── Clustered_vs_Unclustered_Indexes
+│   └── Explanation:
+│       - **Clustered Index**:
+│         - The table data is physically ordered based on the index.
+│         - Only **one clustered index** per table.
+│         - Faster for range queries.
+│
+│       - **Unclustered Index** (Secondary Index):
+│         - Maintains a separate structure pointing to the data locations.
+│         - Multiple unclustered indexes allowed.
+│         - Requires extra lookup (index → data).
+│
+│       Visualization:
+│       ```
+│       Clustered Index:
+│       [1]→Record1  [2]→Record2  [3]→Record3
+│
+│       Unclustered Index:
+│       [Key 2] → Pointer → Record7
+│       [Key 5] → Pointer → Record3
+│       ```
+│
+│
+├── BPlus_Tree_Index
+│   └── Explanation:
+│       B+ Trees are widely used for implementing indexes in databases due to their balanced structure.
+│
+│       Properties:
+│       - All values are stored at the leaf level.
+│       - Internal nodes store keys for navigation.
+│       - Supports efficient range queries.
+│
+│   ├── BPlus_Tree_Operations
+│   │   └── Explanation:
+│   │       1. **Search**:
+│   │          Traverse from root to leaf using keys.
+│   │
+│   │       2. **Insertion**:
+│   │          Insert in sorted order; split nodes if necessary.
+│   │
+│   │       3. **Deletion**:
+│   │          Remove key; merge or redistribute nodes if underflow occurs.
+│   │
+│   │       Algorithm_Walkthrough:
+│   │       ├── Insertion Example (Order 3 B+ Tree):
+│   │       │   Visualization:
+│   │       │   Step 1: Insert 10 → [10]
+│   │       │   Step 2: Insert 20 → [10, 20]
+│   │       │   Step 3: Insert 30 → Split → Root [20], Leaves [10] [20,30]
+│   │
+│
+├── Multi_Attribute_Indexes
+│   └── Explanation:
+│       Indexes can be built on multiple columns (composite indexes).
+│
+│       Example:
+│       - Index on `(LastName, FirstName)` allows efficient queries like:
+│         ```sql
+│         SELECT * FROM People WHERE LastName = 'Smith'
+│         ```
+│       - But less efficient if querying only by `FirstName`.
+│
+│
+├── Hash_Based_Indexing
+│   └── Explanation:
+│       Hash indexes use a hash function to map keys to locations.
+│       - Excellent for equality searches.
+│       - Poor for range queries.
+│
+│       Example_Code:
+│       ```
+│       Key: 25 → Hash(25) → Bucket 3
+│       ```
+│
+│       Related_Concepts:
+│       └── Hash_Collision:
+│           When two keys hash to the same bucket, handled via chaining or open addressing.
+│
+│
+├── Index_Tradeoffs
+│   └── Explanation:
+│       - Indexes speed up reads but slow down writes (insert, update, delete).
+│       - Consumes additional storage.
+│       - Must choose indexing strategy based on workload (OLTP vs OLAP).
+│
+│   ├── OLTP_vs_OLAP
+│   │   └── Explanation:
+│   │       - **OLTP (Online Transaction Processing)**:
+│   │         - Handles high-volume, short, atomic transactions.
+│   │         - Example: Banking systems, e-commerce orders.
+│   │         - Prioritizes fast INSERT, UPDATE, DELETE.
+│   │
+│   │       - **OLAP (Online Analytical Processing)**:
+│   │         - Designed for complex queries over large datasets.
+│   │         - Example: Business intelligence, reporting dashboards.
+│   │         - Prioritizes fast SELECTs, aggregations.
+│   │
+│   │       Visualization:
+│   │       ```
+│   │       +----------------------+        +-----------------------+
+│   │       |        OLTP          |        |         OLAP          |
+│   │       +----------------------+        +-----------------------+
+│   │       | Users: Many          |        | Users: Analysts       |
+│   │       | Operations: Read/Write|       | Operations: Read-only |
+│   │       | Queries: Simple      |        | Queries: Complex      |
+│   │       | Data: Current State  |        | Data: Historical      |
+│   │       +----------------------+        +-----------------------+
+│   │
+│   │       Workflow:
+│   │       OLTP:  User → INSERT / UPDATE → DB
+│   │       OLAP:  Analyst → Complex SELECT → Data Warehouse
+│   │       ```
+│
+│       Summary Table:
+│       ```
+│       | Type           | Best For        | Weakness            |
+│       |----------------|-----------------|---------------------|
+│       | Clustered      | Range Queries   | One per table       |
+│       | Unclustered    | Point Lookups   | Extra I/O           |
+│       | B+ Tree        | Sorted Data     | Maintenance on write|
+│       | Hash Index     | Equality Search | No range support    |
+│       ```
+│
+│
+├── Key_Jargon
+│   ├── Index: Data structure to speed up retrieval.
+│   ├── Clustered_Index: Index where data is physically ordered.
+│   ├── Unclustered_Index: Separate index structure pointing to data.
+│   ├── BPlus_Tree: Balanced tree structure used in databases.
+│   ├── Hash_Index: Index using hash functions for quick lookups.
+│   ├── Leaf_Node: Bottom level of B+ Tree holding actual data pointers.
+│   ├── Internal_Node: Navigational node in B+ Tree.
+│   ├── Hash_Collision: Two keys mapping to the same hash bucket.
+│   └── Data_Shuffling: Movement of data across nodes/partitions (relevant in distributed indexing).
