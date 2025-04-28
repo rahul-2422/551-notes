@@ -1,0 +1,1797 @@
+Foundations_And_Core_Concepts/
+├── SQL_Basics/
+│   ├── What_is_SQL/
+│   │   └── Explanation:
+│   │       SQL (**Structured Query Language**) is a **declarative language** designed to manage and manipulate relational databases.
+│   │
+│   │       🔹 **Key Characteristics:**
+│   │       - **Declarative:** You specify *what* data you want, not *how* to retrieve it.
+│   │       - Operates on **sets of data**, not row-by-row imperative logic.
+│   │       - Standardized by ANSI, with variations across RDBMS vendors.
+│   │
+│   │       🔹 **Core SQL Categories:**
+│   │       - **DDL (Data Definition Language):** `CREATE`, `ALTER`, `DROP` (Defines schema)
+│   │       - **DML (Data Manipulation Language):** `SELECT`, `INSERT`, `UPDATE`, `DELETE`
+│   │       - **DCL (Data Control Language):** `GRANT`, `REVOKE`
+│   │       - **TCL (Transaction Control Language):** `COMMIT`, `ROLLBACK`
+│   │
+│   │       ---
+│   │       Example Query:
+│   │       ```sql
+│   │       SELECT name, salary 
+│   │       FROM employees 
+│   │       WHERE department = 'HR' AND salary > 50000;
+│   │       ```
+│   │
+│   │       This retrieves employees in HR earning above 50,000.
+│   │
+│   │       ---
+│   │       🔹 **Why SQL Matters:**
+│   │       - Foundation for all relational database interactions.
+│   │       - Powers backend systems, reporting tools, and data analytics pipelines.
+│   │
+│   │       ---
+│   │       **Visualization of SQL Flow:**
+│   │       ```
+│   │       [Table: employees]
+│   │       +----+--------+-------------+--------+
+│   │       | ID | Name   | Department  | Salary |
+│   │       +----+--------+-------------+--------+
+│   │       | 1  | Alice  | HR          | 60000  |
+│   │       | 2  | Bob    | IT          | 55000  |
+│   │       | 3  | Carol  | HR          | 48000  |
+│   │       | 4  | David  | HR          | 70000  |
+│   │       +----+--------+-------------+--------+
+│   │
+│   │       Query Filter:
+│   │       WHERE department = 'HR' AND salary > 50000
+│   │
+│   │       Result:
+│   │       +--------+--------+
+│   │       | Name   | Salary |
+│   │       +--------+--------+
+│   │       | Alice  | 60000  |
+│   │       | David  | 70000  |
+│   │       +--------+--------+
+│   │       ```
+│   │
+│   │       ---
+│   │       **Best Practices:**
+│   │       - Always use **WHERE** clauses to avoid full table scans.
+│   │       - Use **LIMIT** for large datasets during testing.
+│   │       - Format queries for readability, especially joins and subqueries.
+│   │
+│   │
+│   ├── SQL_vs_MySQL_vs_RDBMS/
+│   │   └── Explanation:
+│   │       🔹 **SQL**:
+│   │       - A **language standard** (Structured Query Language) used to interact with relational databases.
+│   │       - Defined by ANSI/ISO, implemented by various database systems.
+│   │       - Think of SQL like "English grammar" — many people speak it, but with dialects.
+│   │
+│   │       🔹 **MySQL**:
+│   │       - A popular **Relational Database Management System (RDBMS)**.
+│   │       - Uses SQL as its query language.
+│   │       - Open-source (owned by Oracle now), widely used for web applications.
+│   │       - Has its own **extensions** to standard SQL (like `LIMIT` keyword).
+│   │
+│   │       🔹 **Other RDBMS**:
+│   │       | Feature             | MySQL     | PostgreSQL | OracleDB   | SQL Server |
+│   │       |---------------------|-----------|------------|------------|------------|
+│   │       | Open Source         | Yes       | Yes        | No         | No         |
+│   │       | ACID Compliance     | Good      | Excellent  | Excellent  | Excellent  |
+│   │       | JSON Support        | Moderate  | Advanced   | Advanced   | Good       |
+│   │       | Best for            | Web Apps  | Complex Queries | Enterprise | Windows Ecosystem |
+│   │       | Procedural Language | SQL/PSM   | PL/pgSQL   | PL/SQL     | T-SQL      |
+│   │
+│   │       ---
+│   │       📌 **Key Differences:**
+│   │       - **SQL** = Language.
+│   │       - **MySQL/PostgreSQL/Oracle** = Software systems that *implement* SQL.
+│   │       - Each RDBMS has:
+│   │         - Different storage engines.
+│   │         - Varying support for advanced features (e.g., partitioning, window functions).
+│   │         - Proprietary functions/extensions.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Stick to **ANSI SQL** standards when aiming for portability across databases.
+│   │       - Leverage RDBMS-specific features when optimizing for a single platform.
+│   │       - For MySQL, understand storage engines (e.g., **InnoDB** vs **MyISAM**).
+│   │
+│   │       ---
+│   │       🚨 **Common Pitfall:**
+│   │       Queries written for MySQL might fail in PostgreSQL due to syntax differences like:
+│   │       ```sql
+│   │       -- MySQL-specific
+│   │       SELECT * FROM employees LIMIT 5 OFFSET 10;
+│   │
+│   │       -- SQL Server equivalent
+│   │       SELECT * FROM employees ORDER BY id OFFSET 10 ROWS FETCH NEXT 5 ROWS ONLY;
+│   │       ```
+│   │
+│   │
+│   ├── Data_Types_In_MySQL/
+│   │   └── Explanation:
+│   │       Data types define **what kind of data** can be stored in each column.
+│   │       Choosing the right type impacts:
+│   │       - **Storage efficiency**
+│   │       - **Query performance**
+│   │       - **Data integrity**
+│   │
+│   │       ---
+│   │       🔹 **Main Categories:**
+│   │       1. **Numeric Types**
+│   │          - `TINYINT` (1 byte), `SMALLINT`, `INT` (4 bytes), `BIGINT` (8 bytes)
+│   │          - `DECIMAL(p,s)` for exact precision (financial data)
+│   │          - `FLOAT`, `DOUBLE` for approximate values
+│   │
+│   │          Example:
+│   │          ```sql
+│   │          price DECIMAL(10,2)   -- Up to 99999999.99
+│   │          ```
+│   │
+│   │       2. **String Types**
+│   │          - `CHAR(n)`: Fixed length
+│   │          - `VARCHAR(n)`: Variable length
+│   │          - `TEXT`, `BLOB`: Large texts/binary data
+│   │
+│   │          Example:
+│   │          ```sql
+│   │          name VARCHAR(50)
+│   │          ```
+│   │
+│   │       3. **Date and Time Types**
+│   │          - `DATE` (YYYY-MM-DD)
+│   │          - `DATETIME`, `TIMESTAMP` (timezone-aware)
+│   │          - `TIME`, `YEAR`
+│   │
+│   │          Example:
+│   │          ```sql
+│   │          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+│   │          ```
+│   │
+│   │       ---
+│   │       📊 **Visualization: Storage Impact**
+│   │       | Data Type    | Storage   | Notes                       |
+│   │       |--------------|-----------|-----------------------------|
+│   │       | INT          | 4 Bytes   | -2B to +2B                  |
+│   │       | VARCHAR(100) | Varies    | Actual length + 1 or 2 bytes|
+│   │       | DATE         | 3 Bytes   | '1000-01-01' to '9999-12-31'|
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Use the **smallest numeric type** that fits your data range.
+│   │       - Prefer `VARCHAR` over `TEXT` for searchable columns.
+│   │       - Use `DECIMAL` for monetary values—**never FLOAT** due to precision errors.
+│   │       - Always define appropriate lengths (`VARCHAR(255)` is **not** a default!).
+│   │
+│   │       ---
+│   │       🚨 **Common Pitfalls:**
+│   │       - Oversizing fields → wasted storage & slower indexes.
+│   │       - Using `DATETIME` when `DATE` suffices.
+│   │       - Forgetting that `TIMESTAMP` auto-converts to UTC.
+│   │
+│   │       ---
+│   │       🔹 **Example Table Definition:**
+│   │       ```sql
+│   │       CREATE TABLE orders (
+│   │           order_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+│   │           customer_name VARCHAR(100) NOT NULL,
+│   │           order_total DECIMAL(10,2),
+│   │           order_date DATE
+│   │       );
+│   │       ```
+│   │
+│   │
+│   ├── NULL_Handling/
+│   │   └── Explanation:
+│   │       🔹 **What is NULL?**
+│   │       - `NULL` represents **unknown**, **missing**, or **inapplicable** data.
+│   │       - It is **NOT**:
+│   │         - Zero (`0`)
+│   │         - An empty string (`''`)
+│   │
+│   │       ---
+│   │       📌 **Behavior of NULL in SQL:**
+│   │       1. **Comparisons Involving NULL:**
+│   │          - `NULL = NULL` → **Unknown (NULL)**
+│   │          - Use `IS NULL` or `IS NOT NULL` for checks.
+│   │
+│   │          Example:
+│   │          ```sql
+│   │          SELECT * FROM employees WHERE manager_id IS NULL;
+│   │          ```
+│   │
+│   │       2. **NULL in Expressions:**
+│   │          - Any arithmetic or string operation with `NULL` results in `NULL`.
+│   │          ```sql
+│   │          SELECT salary + NULL  --> NULL
+│   │          ```
+│   │
+│   │       3. **Aggregations & NULL:**
+│   │          - Functions like `AVG()`, `SUM()`, `COUNT(column)` **ignore NULLs**.
+│   │          - But `COUNT(*)` counts all rows.
+│   │
+│   │          Example:
+│   │          ```sql
+│   │          SELECT AVG(bonus) FROM salaries;
+│   │          ```
+│   │
+│   │       ---
+│   │       🔹 **Handling NULLs:**
+│   │       - Use `COALESCE()` to substitute default values.
+│   │
+│   │       Example:
+│   │       ```sql
+│   │       SELECT name, COALESCE(bonus, 0) AS bonus FROM salaries;
+│   │       ```
+│   │       This replaces `NULL` bonuses with `0`.
+│   │
+│   │       - Alternative: `IFNULL()` in MySQL.
+│   │       ```sql
+│   │       SELECT IFNULL(bonus, 0) FROM salaries;
+│   │       ```
+│   │
+│   │       ---
+│   │       🚨 **Common Pitfalls:**
+│   │       - Using `=` or `!=` with NULL:
+│   │         ```sql
+│   │         WHERE bonus = NULL    -- ❌ Incorrect
+│   │         WHERE bonus IS NULL   -- ✅ Correct
+│   │         ```
+│   │
+│   │       - Misunderstanding `NOT IN` with NULLs:
+│   │         ```sql
+│   │         WHERE dept_id NOT IN (1, 2, NULL)  -- Returns no rows!
+│   │         ```
+│   │         If `NULL` is present in an `IN` list, comparisons become unknown.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Define columns as `NOT NULL` wherever possible.
+│   │       - Use default values to minimize unnecessary NULLs.
+│   │       - Be explicit in handling NULL logic in queries.
+│   │
+│   │
+│   └── Schema_Design_Basics/
+│       └── Explanation:
+│           🔹 **What is Schema Design?**
+│           Schema design is the process of structuring your database—defining how data is organized, related, and constrained.
+│
+│           A well-designed schema ensures:
+│           - **Data Integrity**
+│           - **Performance Optimization**
+│           - **Scalability & Maintainability**
+│
+│           ---
+│           📌 **Key Principles:**
+│           1. **Normalization** (Eliminate Redundancy)
+│              - Apply normal forms (1NF, 2NF, 3NF) to avoid data anomalies.
+│              - Example of redundancy:
+│              ```
+│              Orders Table:
+│              +---------+------------+------------+
+│              | OrderID | Customer   | CustomerPhone |
+│              +---------+------------+------------+
+│              |   101   | Alice      | 1234567890   |
+│              |   102   | Alice      | 1234567890   |
+│              ```
+│              Solution: Split into `Customers` and `Orders`.
+│
+│           2. **Use Proper Data Types**
+│              - Optimize storage and enforce correct data formats.
+│
+│           3. **Define Keys & Relationships**
+│              - **Primary Keys**: Uniquely identify records.
+│              - **Foreign Keys**: Maintain referential integrity.
+│
+│           4. **Index Strategically**
+│              - Design indexes based on query patterns.
+│
+│           ---
+│           🔹 **Example: Basic Schema Design**
+│           ```sql
+│           CREATE TABLE customers (
+│               customer_id INT PRIMARY KEY,
+│               name VARCHAR(100) NOT NULL
+│           );
+│
+│           CREATE TABLE orders (
+│               order_id INT PRIMARY KEY,
+│               customer_id INT,
+│               order_date DATE,
+│               FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+│           );
+│           ```
+│
+│           ---
+│           🚨 **Common Pitfalls:**
+│           - **Over-Normalization** leading to excessive JOINs.
+│           - Forgetting to define **constraints**, allowing dirty data.
+│           - Using generic data types like `TEXT` or oversized `VARCHAR`.
+│
+│           ---
+│           ✅ **Best Practices:**
+│           - Balance **Normalization vs. Performance** (Denormalize where necessary for read-heavy systems).
+│           - Always define **Primary Keys**.
+│           - Use **naming conventions** for clarity (e.g., `user_id`, `order_id`).
+│           - Anticipate growth: avoid hard limits unless justified.
+│
+│           ---
+│           📊 **Visualization of Relationships (ERD Concept):**
+│           ```
+│           customers
+│           +-------------+
+│           | customer_id |◄────────┐
+│           | name        |         │
+│           +-------------+         │
+│                                   │
+│           orders                  │
+│           +----------+-------------+
+│           | order_id | customer_id │
+│           | date     |             │
+│           +----------+-------------+
+│           ```
+│
+│
+├── Database_Objects/
+│   ├── Tables/
+│   │   └── Explanation:
+│   │       🔹 **What is a Table?**
+│   │       - A **Table** is the fundamental storage unit in a relational database.
+│   │       - It organizes data into **rows** (records) and **columns** (attributes).
+│   │       - Each column has a defined **data type**.
+│   │
+│   │       ---
+│   │       📌 **Table Structure Example:**
+│   │       ```sql
+│   │       CREATE TABLE employees (
+│   │           emp_id INT PRIMARY KEY,
+│   │           name VARCHAR(100) NOT NULL,
+│   │           department VARCHAR(50),
+│   │           hire_date DATE,
+│   │           salary DECIMAL(10,2)
+│   │       );
+│   │       ```
+│   │
+│   │       This defines:
+│   │       - `emp_id` as a unique identifier.
+│   │       - `name` must always have a value (`NOT NULL`).
+│   │
+│   │       ---
+│   │       📊 **Visualization:**
+│   │       employees
+│   │       +--------+---------+------------+------------+---------+
+│   │       | emp_id | name    | department | hire_date  | salary  |
+│   │       +--------+---------+------------+------------+---------+
+│   │       |   1    | Alice   | HR         | 2022-01-15 | 60000.00|
+│   │       |   2    | Bob     | IT         | 2021-11-20 | 55000.00|
+│   │       +--------+---------+------------+------------+---------+
+│   │
+│   │       ---
+│   │       🔹 **Key Operations:**
+│   │       - `INSERT INTO`, `SELECT`, `UPDATE`, `DELETE`.
+│   │       - Example Insert:
+│   │         ```sql
+│   │         INSERT INTO employees (emp_id, name, department, hire_date, salary)
+│   │         VALUES (3, 'Carol', 'Finance', '2023-03-10', 70000);
+│   │         ```
+│   │
+│   │       ---
+│   │       🚨 **Common Pitfalls:**
+│   │       - No Primary Key defined → Leads to duplicate or unidentifiable rows.
+│   │       - Poor choice of data types causing storage bloat.
+│   │       - Lack of constraints leading to inconsistent data.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Always define a **Primary Key**.
+│   │       - Use **appropriate data types** and avoid defaults like `VARCHAR(255)` blindly.
+│   │       - Add constraints to enforce business rules.
+│   │       - Use **AUTO_INCREMENT** for surrogate keys when natural keys aren't available.
+│   │
+│   │       Example:
+│   │       ```sql
+│   │       CREATE TABLE products (
+│   │           product_id INT AUTO_INCREMENT PRIMARY KEY,
+│   │           product_name VARCHAR(100) NOT NULL
+│   │       );
+│   │       ```
+│   │
+│   │
+│   ├── Views/
+│   │   └── Explanation:
+│   │       🔹 **What is a View?**
+│   │       - A **View** is a **virtual table** based on a SQL query.
+│   │       - It doesn't store data physically but presents data dynamically from underlying tables.
+│   │       - Useful for:
+│   │         - Simplifying complex queries.
+│   │         - Enhancing security (restricting column/row access).
+│   │         - Providing abstraction layers.
+│   │
+│   │       ---
+│   │       📌 **Creating a View:**
+│   │       ```sql
+│   │       CREATE VIEW active_employees AS
+│   │       SELECT emp_id, name, department
+│   │       FROM employees
+│   │       WHERE status = 'active';
+│   │       ```
+│   │       - Querying the View:
+│   │       ```sql
+│   │       SELECT * FROM active_employees;
+│   │       ```
+│   │
+│   │       ---
+│   │       🔹 **Types of Views:**
+│   │       1. **Simple Views** – Based on a single table without functions or GROUP BY.
+│   │       2. **Complex Views** – Involve joins, aggregations, functions.
+│   │       3. **Updatable Views** – Some views allow `INSERT`, `UPDATE`, `DELETE`.
+│   │
+│   │       ---
+│   │       🚨 **Limitations:**
+│   │       - Views can’t always be updated, especially if:
+│   │         - They use `GROUP BY`, `DISTINCT`, `UNION`.
+│   │         - They include aggregate functions.
+│   │       - Performance: Each query on a view runs the underlying SQL → No "free" optimization unless using **Materialized Views** (not natively in MySQL).
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Use Views to **encapsulate business logic**.
+│   │       - Restrict user access to base tables by granting permissions on Views.
+│   │       - Avoid nesting Views within Views in critical paths (can cause performance hits).
+│   │
+│   │       ---
+│   │       🔹 **Example: Join Simplification via View**
+│   │       ```sql
+│   │       CREATE VIEW order_summary AS
+│   │       SELECT o.order_id, c.name AS customer_name, o.order_total
+│   │       FROM orders o
+│   │       JOIN customers c ON o.customer_id = c.customer_id;
+│   │       ```
+│   │       Now, users can:
+│   │       ```sql
+│   │       SELECT * FROM order_summary WHERE order_total > 500;
+│   │       ```
+│   │       Without knowing the join logic.
+│   │
+│   │
+│   ├── Indexes/
+│   │   └── Explanation:
+│   │       🔹 **What is an Index?**
+│   │       - An **Index** is a data structure (typically a **B-Tree** in MySQL) that improves the speed of data retrieval.
+│   │       - Think of it like a book’s index — it helps you find information without scanning every page.
+│   │
+│   │       ---
+│   │       📌 **Types of Indexes in MySQL:**
+│   │       1. **Primary Index**:
+│   │          - Automatically created on the **Primary Key**.
+│   │          - In InnoDB, this is a **Clustered Index**.
+│   │
+│   │       2. **Secondary (Non-Clustered) Index**:
+│   │          - Created on other columns.
+│   │          ```sql
+│   │          CREATE INDEX idx_name ON employees(name);
+│   │          ```
+│   │
+│   │       3. **Unique Index**:
+│   │          - Ensures all values are unique.
+│   │          ```sql
+│   │          CREATE UNIQUE INDEX idx_email ON users(email);
+│   │          ```
+│   │
+│   │       4. **Composite Index**:
+│   │          - Index on multiple columns.
+│   │          ```sql
+│   │          CREATE INDEX idx_dept_salary ON employees(department, salary);
+│   │          ```
+│   │
+│   │       5. **Full-Text Index** (For text search)
+│   │
+│   │       6. **Spatial Index** (For GIS data)
+│   │
+│   │       ---
+│   │       📊 **Visualization: How an Index Works**
+│   │       Without Index:
+│   │       ```
+│   │       SELECT * FROM employees WHERE name = 'Alice';
+│   │       -- Full Table Scan (O(n))
+│   │       ```
+│   │       With Index on `name`:
+│   │       ```
+│   │       -- B-Tree traversal (O(log n))
+│   │       ```
+│   │
+│   │       ---
+│   │       🚨 **Trade-offs:**
+│   │       - **Pros**: Speeds up `SELECT`, `WHERE`, `JOIN`, `ORDER BY`.
+│   │       - **Cons**: Slows down `INSERT`, `UPDATE`, `DELETE` due to index maintenance.
+│   │       - Consumes extra disk space.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Index columns used frequently in:
+│   │         - `WHERE` clauses.
+│   │         - `JOIN` conditions.
+│   │         - `ORDER BY` / `GROUP BY`.
+│   │
+│   │       - Use **Composite Indexes** wisely — order matters!
+│   │         - Index `(col1, col2)` supports queries filtering on `col1` or `col1 AND col2`.
+│   │         - But **not** on `col2` alone.
+│   │
+│   │       - Avoid indexing:
+│   │         - Columns with low cardinality (e.g., gender).
+│   │         - Frequently updated columns.
+│   │
+│   │       ---
+│   │       🔹 **Example:**
+│   │       ```sql
+│   │       CREATE INDEX idx_order_date ON orders(order_date);
+│   │
+│   │       -- Optimized query
+│   │       SELECT * FROM orders WHERE order_date >= '2024-01-01';
+│   │       ```
+│   │
+│   │
+│   ├── Stored_Procedures/
+│   │   └── Explanation:
+│   │       🔹 **What is a Stored Procedure?**
+│   │       - A **Stored Procedure** is a precompiled set of SQL statements stored in the database.
+│   │       - It allows you to execute complex operations by calling a single procedure.
+│   │       - Promotes **code reuse**, **centralized logic**, and **security**.
+│   │
+│   │       ---
+│   │       📌 **Creating a Stored Procedure:**
+│   │       ```sql
+│   │       DELIMITER //
+│   │       CREATE PROCEDURE GetHighEarners(IN min_salary DECIMAL(10,2))
+│   │       BEGIN
+│   │           SELECT name, salary FROM employees WHERE salary > min_salary;
+│   │       END //
+│   │       DELIMITER ;
+│   │       ```
+│   │       - **Call it**:
+│   │       ```sql
+│   │       CALL GetHighEarners(60000);
+│   │       ```
+│   │
+│   │       ---
+│   │       🔹 **Parameters:**
+│   │       - `IN`  → Input parameter.
+│   │       - `OUT` → Output parameter.
+│   │       - `INOUT` → Acts as both input and output.
+│   │
+│   │       ---
+│   │       🚨 **Common Use Cases:**
+│   │       - Batch operations.
+│   │       - Data validation routines.
+│   │       - Complex business logic.
+│   │       - Abstracting repetitive queries from applications.
+│   │
+│   │       ---
+│   │       ⚡ **Performance Considerations:**
+│   │       - Reduces **network traffic** by bundling operations.
+│   │       - BUT, procedural code in SQL (loops, conditionals) can be slower than app-level logic.
+│   │       - Harder to scale in distributed architectures (logic locked in DB).
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Use for **data-centric operations** (where data is heavily involved).
+│   │       - Avoid embedding heavy business logic—keep that in application layers.
+│   │       - Document procedures well; they can become hidden "black boxes".
+│   │
+│   │       ---
+│   │       🔹 **Example with OUT parameter:**
+│   │       ```sql
+│   │       DELIMITER //
+│   │       CREATE PROCEDURE CountEmployees(OUT emp_count INT)
+│   │       BEGIN
+│   │           SELECT COUNT(*) INTO emp_count FROM employees;
+│   │       END //
+│   │       DELIMITER ;
+│   │
+│   │       CALL CountEmployees(@total);
+│   │       SELECT @total;
+│   │       ```
+│   │
+│   │
+│   └── Constraints/
+│       ├── Primary_Key/
+│       │   └── Explanation:
+│       │       - A **Primary Key (PK)** uniquely identifies each row in a table.
+│       │       - It is **NOT NULL** and **UNIQUE** by definition.
+│       │       - A table can have **only one** PK (can be single or multi-column).
+│       │
+│       │       Example (Single-column PK):
+│       │       ```sql
+│       │       CREATE TABLE customers (
+│       │           customer_id INT PRIMARY KEY,
+│       │           name VARCHAR(100)
+│       │       );
+│       │       ```
+│       │
+│       │       Example (Composite PK):
+│       │       ```sql
+│       │       CREATE TABLE enrollments (
+│       │           student_id INT,
+│       │           course_id INT,
+│       │           PRIMARY KEY (student_id, course_id)
+│       │       );
+│       │       ```
+│       │
+│       │       ✅ **Best Practices:**
+│       │       - Use **surrogate keys** (`AUTO_INCREMENT`) when natural keys are too complex.
+│       │       - Keep composite keys minimal to avoid large index overhead.
+│       │
+│       ├── Foreign_Key/
+│       │   └── Explanation:
+│       │       - A **Foreign Key (FK)** enforces referential integrity between tables.
+│       │       - Links a column in one table to the **Primary Key** in another.
+│       │
+│       │       Example:
+│       │       ```sql
+│       │       CREATE TABLE orders (
+│       │           order_id INT PRIMARY KEY,
+│       │           customer_id INT,
+│       │           FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+│       │       );
+│       │       ```
+│       │
+│       │       🔹 **Cascading Actions**:
+│       │       ```sql
+│       │       FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+│       │       ON DELETE CASCADE
+│       │       ON UPDATE CASCADE
+│       │       ```
+│       │       - `CASCADE`: Propagates changes.
+│       │       - `SET NULL`: Sets FK to NULL.
+│       │       - `RESTRICT` / `NO ACTION`: Prevents the change.
+│       │
+│       │       🚨 **Pitfall:** Be cautious with `ON DELETE CASCADE` in production systems!
+│       │
+│       ├── Unique/
+│       │   └── Explanation:
+│       │       - Ensures all values in a column (or group of columns) are **unique**.
+│       │       - Unlike PK, allows **multiple NULLs**.
+│       │
+│       │       Example:
+│       │       ```sql
+│       │       CREATE TABLE users (
+│       │           user_id INT PRIMARY KEY,
+│       │           email VARCHAR(100),
+│       │           UNIQUE (email)
+│       │       );
+│       │       ```
+│       │
+│       │       🔹 Composite UNIQUE:
+│       │       ```sql
+│       │       UNIQUE (first_name, last_name)
+│       │       ```
+│       │
+│       ├── Check/
+│       │   └── Explanation:
+│       │       - Restricts values based on a condition.
+│       │       - Enforced at the row level during `INSERT` or `UPDATE`.
+│       │
+│       │       Example:
+│       │       ```sql
+│       │       CREATE TABLE employees (
+│       │           emp_id INT PRIMARY KEY,
+│       │           salary DECIMAL(10,2),
+│       │           CHECK (salary >= 15000)
+│       │       );
+│       │       ```
+│       │
+│       │       🔹 Advanced Example:
+│       │       ```sql
+│       │       CHECK (end_date > start_date)
+│       │       ```
+│       │
+│       │       🚨 Note: MySQL enforced `CHECK` constraints only from version 8.0+.
+│       │
+│       └── Default/
+│           └── Explanation:
+│               - Sets a **default value** when no explicit value is provided.
+│
+│               Example:
+│               ```sql
+│               CREATE TABLE products (
+│                   product_id INT PRIMARY KEY,
+│                   stock INT DEFAULT 0
+│               );
+│
+│               INSERT INTO products (product_id) VALUES (1);
+│               -- stock will be 0 by default
+│               ```
+│
+│               ✅ Best Practices:
+│               - Use defaults to avoid NULLs where applicable.
+│               - For timestamps:
+│               ```sql
+│               created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+│               ```
+│
+│
+├── SELECT_Statement/
+│   ├── Basic_SELECT/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: Retrieve data from one or more tables.
+│   │       - The `SELECT` statement defines **which columns** to fetch.
+│   │       - By default, it returns **all matching rows** unless filtered.
+│   │
+│   │       ---
+│   │       📌 **Syntax**:
+│   │       ```sql
+│   │       SELECT column1, column2, ...
+│   │       FROM table_name;
+│   │       ```
+│   │
+│   │       Example:
+│   │       ```sql
+│   │       SELECT name, department FROM employees;
+│   │       ```
+│   │
+│   │       - Use `SELECT *` to fetch **all columns**, but:
+│   │         🚨 **Avoid `SELECT *` in production** — it’s inefficient and can break apps if schema changes.
+│   │
+│   │       ---
+│   │       📊 **Visualization**:
+│   │       Table: employees
+│   │       +----+--------+------------+--------+
+│   │       | id | name   | department | salary |
+│   │       +----+--------+------------+--------+
+│   │       | 1  | Alice  | HR         | 60000  |
+│   │       | 2  | Bob    | IT         | 55000  |
+│   │       +----+--------+------------+--------+
+│   │
+│   │       Query:
+│   │       ```sql
+│   │       SELECT name, salary FROM employees;
+│   │       ```
+│   │
+│   │       Result:
+│   │       +--------+--------+
+│   │       | name   | salary |
+│   │       +--------+--------+
+│   │       | Alice  | 60000  |
+│   │       | Bob    | 55000  |
+│   │       +--------+--------+
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Always specify required columns.
+│   │       - Alias columns for clarity:
+│   │         ```sql
+│   │         SELECT name AS employee_name FROM employees;
+│   │         ```
+│   │       - Use consistent formatting for readability.
+│   │
+│   │       ---
+│   │       🚨 **Common Pitfalls:**
+│   │       - Forgetting the `FROM` clause (applies in some DBs, but not standard SQL).
+│   │       - Using `SELECT *` leading to:
+│   │         - Increased network load.
+│   │         - Unused data fetched.
+│   │
+│   │
+│   ├── SELECT_DISTINCT/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: Eliminate **duplicate rows** from the result set.
+│   │       - `DISTINCT` applies to **all selected columns** as a group.
+│   │
+│   │       ---
+│   │       📌 **Syntax**:
+│   │       ```sql
+│   │       SELECT DISTINCT column1, column2
+│   │       FROM table_name;
+│   │       ```
+│   │
+│   │       Example:
+│   │       ```sql
+│   │       SELECT DISTINCT department FROM employees;
+│   │       ```
+│   │
+│   │       ---
+│   │       📊 **Visualization**:
+│   │       employees table:
+│   │       +----+--------+------------+
+│   │       | id | name   | department |
+│   │       +----+--------+------------+
+│   │       | 1  | Alice  | HR         |
+│   │       | 2  | Bob    | IT         |
+│   │       | 3  | Carol  | HR         |
+│   │
+│   │       Query:
+│   │       ```sql
+│   │       SELECT DISTINCT department FROM employees;
+│   │       ```
+│   │       Result:
+│   │       +------------+
+│   │       | department |
+│   │       +------------+
+│   │       | HR         |
+│   │       | IT         |
+│   │       +------------+
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - `DISTINCT` applies to the **combination** of columns:
+│   │         ```sql
+│   │         SELECT DISTINCT department, name FROM employees;
+│   │         ```
+│   │         This only removes rows where **both** columns are identical.
+│   │
+│   │       - Internally, MySQL performs a **sort** or uses a **temporary table** → Can impact performance on large datasets.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Only use `DISTINCT` when truly needed — avoid as a lazy fix for bad joins or poor data modeling.
+│   │       - For counting unique values:
+│   │         ```sql
+│   │         SELECT COUNT(DISTINCT department) FROM employees;
+│   │         ```
+│   │
+│   │       ---
+│   │       ⚡ **Alternative Techniques:**
+│   │       - Use `GROUP BY` when you also want aggregations.
+│   │       ```sql
+│   │       SELECT department FROM employees GROUP BY department;
+│   │       ```
+│   │
+│   │
+│   ├── SELECT_with_WHERE/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: Filter rows based on specified conditions.
+│   │       - The `WHERE` clause restricts the result set to rows that meet the condition(s).
+│   │       - It operates **before** grouping, ordering, or limiting results.
+│   │
+│   │       ---
+│   │       📌 **Syntax**:
+│   │       ```sql
+│   │       SELECT column1, column2
+│   │       FROM table_name
+│   │       WHERE condition;
+│   │       ```
+│   │
+│   │       Example:
+│   │       ```sql
+│   │       SELECT name, salary
+│   │       FROM employees
+│   │       WHERE department = 'IT' AND salary > 50000;
+│   │       ```
+│   │
+│   │       ---
+│   │       📊 **Visualization**:
+│   │       employees table:
+│   │       +----+--------+------------+--------+
+│   │       | id | name   | department | salary |
+│   │       +----+--------+------------+--------+
+│   │       | 1  | Alice  | HR         | 60000  |
+│   │       | 2  | Bob    | IT         | 55000  |
+│   │       | 3  | Carol  | IT         | 48000  |
+│   │
+│   │       Query Result:
+│   │       +--------+--------+
+│   │       | name   | salary |
+│   │       +--------+--------+
+│   │       | Bob    | 55000  |
+│   │       +--------+--------+
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - String comparisons are **case-insensitive** by default in MySQL (`latin1` / `utf8_general_ci` collations).
+│   │       - Use quotes `'value'` for string literals.
+│   │       - Combine conditions using `AND`, `OR`, `NOT`.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Use indexed columns in `WHERE` for better performance.
+│   │       - Watch out for:
+│   │         ```sql
+│   │         WHERE column = NULL   -- ❌ Incorrect
+│   │         WHERE column IS NULL  -- ✅ Correct
+│   │         ```
+│   │
+│   │       - Use parentheses to control logic flow:
+│   │         ```sql
+│   │         WHERE (dept = 'HR' OR dept = 'IT') AND salary > 50000
+│   │         ```
+│   │
+│   │       ---
+│   │       ⚡ **Alternative Techniques:**
+│   │       - Use `BETWEEN`, `IN`, `LIKE` for flexible filtering (covered in detail under `WHERE_Clauses/`).
+│   │
+│   │
+│   ├── SELECT_with_ORDER_BY/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: Sort the result set by one or more columns.
+│   │       - By default, `ORDER BY` sorts in **ascending (ASC)** order.
+│   │       - You can specify **DESC** for descending order.
+│   │
+│   │       ---
+│   │       📌 **Syntax**:
+│   │       ```sql
+│   │       SELECT column1, column2
+│   │       FROM table_name
+│   │       ORDER BY column1 [ASC|DESC], column2 [ASC|DESC];
+│   │       ```
+│   │
+│   │       Example:
+│   │       ```sql
+│   │       SELECT name, salary
+│   │       FROM employees
+│   │       ORDER BY salary DESC;
+│   │       ```
+│   │
+│   │       ---
+│   │       📊 **Visualization**:
+│   │       employees table:
+│   │       +--------+--------+
+│   │       | name   | salary |
+│   │       +--------+--------+
+│   │       | Alice  | 60000  |
+│   │       | Bob    | 55000  |
+│   │       | Carol  | 48000  |
+│   │
+│   │       After `ORDER BY salary DESC`:
+│   │       +--------+--------+
+│   │       | name   | salary |
+│   │       +--------+--------+
+│   │       | Alice  | 60000  |
+│   │       | Bob    | 55000  |
+│   │       | Carol  | 48000  |
+│   │       +--------+--------+
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - You can order by:
+│   │         - **Column names**
+│   │         - **Column positions** (not recommended for clarity)
+│   │         ```sql
+│   │         ORDER BY 2 DESC  -- Sorts by second selected column
+│   │         ```
+│   │       - `NULL` values by default:
+│   │         - In MySQL, `NULL` appears **first** in ASC, **last** in DESC.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Always be explicit with `ASC` or `DESC` for readability.
+│   │       - Use `ORDER BY` **after** filtering (`WHERE`), but **before** `LIMIT`.
+│   │       - For stable sorting, include secondary columns:
+│   │         ```sql
+│   │         ORDER BY salary DESC, name ASC
+│   │         ```
+│   │
+│   │       ---
+│   │       ⚡ **Performance Tips:**
+│   │       - Sorting is resource-intensive—use indexes to optimize `ORDER BY` where possible.
+│   │       - Avoid `ORDER BY` on calculated fields without necessity.
+│   │
+│   │
+│   ├── SELECT_with_LIMIT_and_OFFSET/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: Restrict the number of rows returned by a query.
+│   │       - `LIMIT` defines **how many rows** to return.
+│   │       - `OFFSET` defines **where to start** returning rows (used for pagination).
+│   │
+│   │       ---
+│   │       📌 **Syntax**:
+│   │       ```sql
+│   │       SELECT column1, column2
+│   │       FROM table_name
+│   │       ORDER BY column1
+│   │       LIMIT number_of_rows OFFSET start_point;
+│   │       ```
+│   │
+│   │       🔹 Shortcut Syntax:
+│   │       ```sql
+│   │       LIMIT start_point, number_of_rows
+│   │       ```
+│   │       Example (get 5 rows starting from 11th row):
+│   │       ```sql
+│   │       SELECT * FROM employees
+│   │       ORDER BY emp_id
+│   │       LIMIT 10, 5;
+│   │       ```
+│   │
+│   │       ---
+│   │       📊 **Visualization**:
+│   │       Assume ordered employee IDs:
+│   │       +--------+
+│   │       | emp_id |
+│   │       +--------+
+│   │       |   1    |
+│   │       |   2    |
+│   │       |  ...   |
+│   │       |  10    |
+│   │       |  11    |  ◄── Start here (OFFSET 10)
+│   │       |  12    |
+│   │       |  13    |
+│   │       |  14    |
+│   │       |  15    |
+│   │       +--------+
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - `LIMIT` without `ORDER BY` returns **arbitrary rows** (no guaranteed order).
+│   │       - `OFFSET` starts counting from **zero**.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Always pair `LIMIT` with `ORDER BY` for predictable results.
+│   │       - For large offsets (deep pagination), performance degrades—consider "keyset pagination" as an alternative.
+│   │
+│   │       ---
+│   │       ⚡ **Example: Pagination Query**
+│   │       ```sql
+│   │       -- Page 2, 10 rows per page
+│   │       SELECT * FROM products
+│   │       ORDER BY product_id
+│   │       LIMIT 10 OFFSET 10;
+│   │       ```
+│   │
+│   │
+│   ├── SELECT_with_GROUP_BY_and_HAVING/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**:
+│   │       - `GROUP BY` groups rows sharing a value into summary rows.
+│   │       - Typically used with **aggregate functions** (`COUNT`, `SUM`, etc.).
+│   │       - `HAVING` filters groups **after aggregation** (whereas `WHERE` filters rows **before grouping**).
+│   │
+│   │       ---
+│   │       📌 **Syntax**:
+│   │       ```sql
+│   │       SELECT column1, AGG_FUNC(column2)
+│   │       FROM table_name
+│   │       WHERE condition
+│   │       GROUP BY column1
+│   │       HAVING aggregate_condition
+│   │       ORDER BY column1;
+│   │       ```
+│   │
+│   │       Example:
+│   │       ```sql
+│   │       SELECT department, COUNT(*) AS emp_count
+│   │       FROM employees
+│   │       GROUP BY department
+│   │       HAVING emp_count > 5;
+│   │       ```
+│   │
+│   │       ---
+│   │       📊 **Visualization**:
+│   │       employees table:
+│   │       +--------+------------+
+│   │       | name   | department |
+│   │       +--------+------------+
+│   │       | Alice  | HR         |
+│   │       | Bob    | IT         |
+│   │       | Carol  | HR         |
+│   │       | Dave   | IT         |
+│   │       | Emma   | HR         |
+│   │
+│   │       After `GROUP BY department`:
+│   │       +------------+-----------+
+│   │       | department | emp_count |
+│   │       +------------+-----------+
+│   │       | HR         |     3     |
+│   │       | IT         |     2     |
+│   │       +------------+-----------+
+│   │
+│   │       Apply `HAVING emp_count > 2`:
+│   │       +------------+-----------+
+│   │       | HR         |     3     |
+│   │       +------------+-----------+
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - Every non-aggregated column in `SELECT` **must appear** in `GROUP BY`.
+│   │       - `HAVING` works **after** aggregation — don’t confuse it with `WHERE`.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Use `WHERE` to reduce dataset **before** grouping for better performance.
+│   │       - Alias aggregated columns for readability (`AS` keyword).
+│   │
+│   │       ---
+│   │       ⚡ **Example: Filter Before and After**
+│   │       ```sql
+│   │       SELECT department, AVG(salary) AS avg_sal
+│   │       FROM employees
+│   │       WHERE salary > 40000
+│   │       GROUP BY department
+│   │       HAVING avg_sal > 50000;
+│   │       ```
+│   │
+│   │
+├── WHERE_Clauses/
+│   ├── Operators/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: Operators define conditions in `WHERE` clauses to filter data.
+│   │
+│   │       ---
+│   │       📌 **Common Operators in SQL:**
+│   │       1. `=` : **Equals**
+│   │          ```sql
+│   │          WHERE department = 'IT'
+│   │          ```
+│   │
+│   │       2. `<>` or `!=` : **Not Equal**
+│   │          ```sql
+│   │          WHERE salary <> 50000
+│   │          ```
+│   │
+│   │       3. `BETWEEN ... AND ...` : **Range Filter (Inclusive)**
+│   │          ```sql
+│   │          WHERE salary BETWEEN 40000 AND 60000
+│   │          ```
+│   │
+│   │       4. `LIKE` : **Pattern Matching**
+│   │          - `%` = any sequence of characters
+│   │          - `_` = single character
+│   │          ```sql
+│   │          WHERE name LIKE 'A%'
+│   │          ```
+│   │
+│   │       5. `IN` : **Match from a List**
+│   │          ```sql
+│   │          WHERE department IN ('HR', 'IT')
+│   │          ```
+│   │
+│   │       6. `IS NULL` / `IS NOT NULL` : **Null Checks**
+│   │          ```sql
+│   │          WHERE manager_id IS NULL
+│   │          ```
+│   │
+│   │       ---
+│   │       📊 **Visualization Example**:
+│   │       ```sql
+│   │       SELECT * FROM employees
+│   │       WHERE salary BETWEEN 50000 AND 70000
+│   │             AND department IN ('HR', 'Finance');
+│   │       ```
+│   │       - Filters employees in HR/Finance earning within the specified range.
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - `BETWEEN` is **inclusive** (includes boundary values).
+│   │       - `LIKE 'A%'` is **case-insensitive** by default in MySQL unless collation is changed.
+│   │       - `IN` with a large list may degrade performance — consider using a join with a lookup table.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - For patterns, avoid starting `LIKE` with `%`:
+│   │         ```sql
+│   │         WHERE name LIKE '%son'   -- ❌ Prevents index usage
+│   │         WHERE name LIKE 'A%'     -- ✅ Index-friendly
+│   │         ```
+│   │       - Use `IS NULL` properly — never use `= NULL`.
+│   │
+│   │       ---
+│   │       ⚡ **Alternative:**
+│   │       - Replace multiple `OR` conditions with `IN` for cleaner syntax:
+│   │         ```sql
+│   │         WHERE dept = 'HR' OR dept = 'IT' OR dept = 'Finance'
+│   │         -- becomes
+│   │         WHERE dept IN ('HR', 'IT', 'Finance')
+│   │         ```
+│   │
+│   │
+│   ├── Logical_Operators/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: Combine multiple conditions in a `WHERE` clause.
+│   │
+│   │       ---
+│   │       📌 **Logical Operators:**
+│   │       1. **`AND`** — All conditions must be true.
+│   │          ```sql
+│   │          WHERE department = 'IT' AND salary > 50000
+│   │          ```
+│   │
+│   │       2. **`OR`** — At least one condition must be true.
+│   │          ```sql
+│   │          WHERE department = 'HR' OR department = 'Finance'
+│   │          ```
+│   │
+│   │       3. **`NOT`** — Negates a condition.
+│   │          ```sql
+│   │          WHERE NOT (department = 'HR')
+│   │          ```
+│   │
+│   │       ---
+│   │       📊 **Visualization of Condition Logic**:
+│   │       ```sql
+│   │       SELECT * FROM employees
+│   │       WHERE department = 'IT'
+│   │         AND salary BETWEEN 50000 AND 70000
+│   │         OR department = 'HR';
+│   │       ```
+│   │       ⚠️ Without parentheses, this evaluates as:
+│   │       ```
+│   │       (department = 'IT' AND salary BETWEEN 50k AND 70k)
+│   │       OR
+│   │       (department = 'HR')
+│   │       ```
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - `AND` has **higher precedence** than `OR`.
+│   │       - Always use **parentheses** `()` to make logic explicit and avoid surprises.
+│   │
+│   │       Example:
+│   │       ```sql
+│   │       WHERE (department = 'IT' OR department = 'HR')
+│   │         AND salary > 50000
+│   │       ```
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Use parentheses to clarify complex conditions.
+│   │       - Avoid overusing `NOT` — it can confuse logic and sometimes block index usage.
+│   │       - Rewrite negative logic where possible:
+│   │         ```sql
+│   │         WHERE NOT (salary BETWEEN 40000 AND 60000)
+│   │         -- Better as:
+│   │         WHERE salary < 40000 OR salary > 60000
+│   │         ```
+│   │
+│   │       ---
+│   │       ⚡ **Performance Tip:**
+│   │       - Place the most **selective conditions first** when using `AND` (though modern optimizers handle this, it helps readability).
+│   │
+│   │
+├── JOINS/
+│   ├── INNER_JOIN/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: Retrieve records with **matching values** in both tables.
+│   │       - The most common type of join.
+│   │       - Returns rows **only where the join condition is true**.
+│   │
+│   │       ---
+│   │       📌 **Syntax**:
+│   │       ```sql
+│   │       SELECT a.column1, b.column2
+│   │       FROM tableA a
+│   │       INNER JOIN tableB b
+│   │       ON a.common_field = b.common_field;
+│   │       ```
+│   │
+│   │       Example:
+│   │       ```sql
+│   │       SELECT employees.name, departments.dept_name
+│   │       FROM employees
+│   │       INNER JOIN departments
+│   │       ON employees.dept_id = departments.dept_id;
+│   │       ```
+│   │
+│   │       ---
+│   │       📊 **Visualization**:
+│   │       **employees**
+│   │       +----+--------+---------+
+│   │       | id | name   | dept_id |
+│   │       +----+--------+---------+
+│   │       | 1  | Alice  |   10    |
+│   │       | 2  | Bob    |   20    |
+│   │
+│   │       **departments**
+│   │       +---------+------------+
+│   │       | dept_id | dept_name  |
+│   │       +---------+------------+
+│   │       |   10    | HR         |
+│   │       |   30    | Finance    |
+│   │
+│   │       Result of INNER JOIN:
+│   │       +--------+------------+
+│   │       | name   | dept_name  |
+│   │       +--------+------------+
+│   │       | Alice  | HR         |
+│   │       +--------+------------+
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - If no match is found in either table, that row is **excluded**.
+│   │       - `INNER JOIN` is equivalent to:
+│   │         ```sql
+│   │         FROM tableA a, tableB b
+│   │         WHERE a.id = b.id
+│   │         ```
+│   │         But explicit `JOIN` syntax is clearer and preferred.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Always use **ON** for clear join conditions.
+│   │       - Qualify column names (`table.column`) to avoid ambiguity.
+│   │       - Ensure join fields are indexed for performance.
+│   │
+│   │       ---
+│   │       ⚡ **Performance Tip:**
+│   │       - Watch for accidental **Cartesian products** when missing join conditions.
+│   │       - Use `EXPLAIN` to analyze join execution plans.
+│   │
+│   │
+│   ├── LEFT_JOIN/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: Return **all rows** from the **left table**, and matched rows from the right table.
+│   │       - If there’s no match, columns from the right table return **NULL**.
+│   │
+│   │       ---
+│   │       📌 **Syntax**:
+│   │       ```sql
+│   │       SELECT a.column1, b.column2
+│   │       FROM tableA a
+│   │       LEFT JOIN tableB b
+│   │       ON a.common_field = b.common_field;
+│   │       ```
+│   │
+│   │       Example:
+│   │       ```sql
+│   │       SELECT employees.name, departments.dept_name
+│   │       FROM employees
+│   │       LEFT JOIN departments
+│   │       ON employees.dept_id = departments.dept_id;
+│   │       ```
+│   │
+│   │       ---
+│   │       📊 **Visualization**:
+│   │       **employees**
+│   │       +----+--------+---------+
+│   │       | id | name   | dept_id |
+│   │       +----+--------+---------+
+│   │       | 1  | Alice  |   10    |
+│   │       | 2  | Bob    |   20    |
+│   │
+│   │       **departments**
+│   │       +---------+------------+
+│   │       | dept_id | dept_name  |
+│   │       +---------+------------+
+│   │       |   10    | HR         |
+│   │
+│   │       Result of LEFT JOIN:
+│   │       +--------+------------+
+│   │       | name   | dept_name  |
+│   │       +--------+------------+
+│   │       | Alice  | HR         |
+│   │       | Bob    | NULL       |
+│   │       +--------+------------+
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - Always remember: LEFT JOIN = **All Left + Matched Right**.
+│   │       - Use `IS NULL` to detect **unmatched rows**:
+│   │         ```sql
+│   │         WHERE departments.dept_id IS NULL
+│   │         ```
+│   │         This finds "orphans" — rows with no match.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Use LEFT JOIN when you need a **complete list** from the primary table, regardless of relationships.
+│   │       - Filter carefully — applying conditions on the right table can accidentally turn a LEFT JOIN into an INNER JOIN if not handled properly.
+│   │
+│   │       Example (correct way to filter right table conditionally):
+│   │       ```sql
+│   │       WHERE departments.dept_name = 'HR' OR departments.dept_name IS NULL
+│   │       ```
+│   │
+│   │       ---
+│   │       ⚡ **Performance Tip:**
+│   │       - Ensure join columns are indexed, especially in large datasets.
+│   │       - Avoid unnecessary LEFT JOINs if an INNER JOIN suffices — they are heavier.
+│   │
+│   │
+│   ├── RIGHT_JOIN/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: Return **all rows** from the **right table**, and matched rows from the left table.
+│   │       - If there’s no match, columns from the left table return **NULL**.
+│   │       - Less commonly used than `LEFT JOIN` but functionally identical if you reverse table order.
+│   │
+│   │       ---
+│   │       📌 **Syntax**:
+│   │       ```sql
+│   │       SELECT a.column1, b.column2
+│   │       FROM tableA a
+│   │       RIGHT JOIN tableB b
+│   │       ON a.common_field = b.common_field;
+│   │       ```
+│   │
+│   │       Example:
+│   │       ```sql
+│   │       SELECT employees.name, departments.dept_name
+│   │       FROM employees
+│   │       RIGHT JOIN departments
+│   │       ON employees.dept_id = departments.dept_id;
+│   │       ```
+│   │
+│   │       ---
+│   │       📊 **Visualization**:
+│   │       **employees**
+│   │       +----+--------+---------+
+│   │       | id | name   | dept_id |
+│   │       +----+--------+---------+
+│   │       | 1  | Alice  |   10    |
+│   │
+│   │       **departments**
+│   │       +---------+------------+
+│   │       | dept_id | dept_name  |
+│   │       +---------+------------+
+│   │       |   10    | HR         |
+│   │       |   20    | IT         |
+│   │
+│   │       Result of RIGHT JOIN:
+│   │       +--------+------------+
+│   │       | name   | dept_name  |
+│   │       +--------+------------+
+│   │       | Alice  | HR         |
+│   │       | NULL   | IT         |
+│   │       +--------+------------+
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - RIGHT JOIN is rarely necessary — you can rewrite it as a `LEFT JOIN` by swapping tables.
+│   │
+│   │       Equivalent:
+│   │       ```sql
+│   │       A RIGHT JOIN B  ≡  B LEFT JOIN A
+│   │       ```
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Prefer `LEFT JOIN` for readability and consistency unless logic dictates otherwise.
+│   │       - Use `IS NULL` checks to identify non-matching left table entries.
+│   │
+│   │       ---
+│   │       ⚡ **Performance Tip:**
+│   │       - Same optimization rules as LEFT JOIN — index your join keys.
+│   │
+│   │
+│   ├── FULL_OUTER_JOIN_and_Workaround/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: 
+│   │       - A **FULL OUTER JOIN** returns:
+│   │         - All matching rows from both tables (**like INNER JOIN**).
+│   │         - Plus **unmatched rows** from both the left and right tables, filling gaps with `NULL`.
+│   │
+│   │       ---
+│   │       📌 **Standard SQL Syntax** (❌ Not supported in MySQL):
+│   │       ```sql
+│   │       SELECT *
+│   │       FROM tableA
+│   │       FULL OUTER JOIN tableB
+│   │       ON tableA.id = tableB.id;
+│   │       ```
+│   │
+│   │       ---
+│   │       🚨 **MySQL Workaround**:
+│   │       - Simulate FULL OUTER JOIN using `UNION` of `LEFT JOIN` and `RIGHT JOIN`.
+│   │
+│   │       ```sql
+│   │       SELECT a.id, a.col1, b.col2
+│   │       FROM tableA a
+│   │       LEFT JOIN tableB b ON a.id = b.id
+│   │
+│   │       UNION
+│   │
+│   │       SELECT a.id, a.col1, b.col2
+│   │       FROM tableA a
+│   │       RIGHT JOIN tableB b ON a.id = b.id;
+│   │       ```
+│   │
+│   │       - `UNION` removes duplicates automatically.
+│   │       - If you want to **keep duplicates**, use `UNION ALL`.
+│   │
+│   │       ---
+│   │       📊 **Visualization**:
+│   │       ```
+│   │       Result = (Matched Rows)
+│   │              + (Unmatched Left Rows)
+│   │              + (Unmatched Right Rows)
+│   │       ```
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - If possible, **rethink schema or query logic** to avoid FULL OUTER JOIN in MySQL.
+│   │       - Use `COALESCE()` to handle `NULL` values gracefully in results:
+│   │         ```sql
+│   │         SELECT COALESCE(a.id, b.id) AS id, ...
+│   │         ```
+│   │
+│   │       ---
+│   │       ⚡ **Performance Tip:**
+│   │       - This workaround runs **two joins**, so it’s heavier than standard joins.
+│   │       - Ensure proper indexing on join keys to minimize performance hit.
+│   │
+│   │
+│   ├── CROSS_JOIN/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: 
+│   │       - A **CROSS JOIN** returns the **Cartesian product** of two tables.
+│   │       - Every row from the first table is paired with **every row** from the second table.
+│   │       - Typically used when **all combinations** are needed.
+│   │
+│   │       ---
+│   │       📌 **Syntax**:
+│   │       ```sql
+│   │       SELECT *
+│   │       FROM tableA
+│   │       CROSS JOIN tableB;
+│   │       ```
+│   │       - Alternatively (implicit syntax, but risky):
+│   │       ```sql
+│   │       SELECT *
+│   │       FROM tableA, tableB;
+│   │       ```
+│   │       ⚠️ Without a `WHERE` clause, this behaves like a CROSS JOIN.
+│   │
+│   │       ---
+│   │       📊 **Visualization**:
+│   │       Table A (2 rows)      Table B (3 rows)
+│   │       +----+--------+       +----+-------+
+│   │       | id | Name   |       | id | Color |
+│   │       +----+--------+       +----+-------+
+│   │       | 1  | Alice  |       | 1  | Red   |
+│   │       | 2  | Bob    |       | 2  | Blue  |
+│   │                           +  | 3  | Green |
+│   │
+│   │       Result: 2 x 3 = **6 rows**
+│   │       +--------+-------+
+│   │       | Name   | Color |
+│   │       +--------+-------+
+│   │       | Alice  | Red   |
+│   │       | Alice  | Blue  |
+│   │       | Alice  | Green |
+│   │       | Bob    | Red   |
+│   │       | Bob    | Blue  |
+│   │       | Bob    | Green |
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - Be cautious — output size = rows_in_A * rows_in_B.
+│   │       - Accidental Cartesian products often happen by forgetting join conditions in regular joins.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Use CROSS JOIN **only** when you explicitly need combinations (e.g., generating schedules, pairing datasets).
+│   │       - For readability, prefer explicit `CROSS JOIN` over comma joins.
+│   │
+│   │       ---
+│   │       ⚡ **Performance Tip:**
+│   │       - Always estimate row counts before running CROSS JOINs on large tables to avoid crashes or long executions.
+│   │
+│   │
+│   ├── Self_Join/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: 
+│   │       - A **Self Join** is when a table is joined **to itself**.
+│   │       - Useful for:
+│   │         - Hierarchical data (e.g., employees & managers).
+│   │         - Comparing rows within the same table.
+│   │
+│   │       ---
+│   │       📌 **Syntax**:
+│   │       - You must use **table aliases** to differentiate instances.
+│   │       ```sql
+│   │       SELECT e1.name AS Employee, e2.name AS Manager
+│   │       FROM employees e1
+│   │       LEFT JOIN employees e2
+│   │       ON e1.manager_id = e2.emp_id;
+│   │       ```
+│   │
+│   │       ---
+│   │       📊 **Visualization**:
+│   │       employees table:
+│   │       +--------+-----------+------------+
+│   │       | emp_id | name      | manager_id |
+│   │       +--------+-----------+------------+
+│   │       |   1    | Alice     |   NULL     |
+│   │       |   2    | Bob       |     1      |
+│   │       |   3    | Carol     |     1      |
+│   │       |   4    | Dave      |     2      |
+│   │
+│   │       Result:
+│   │       +----------+-----------+
+│   │       | Employee | Manager   |
+│   │       +----------+-----------+
+│   │       | Alice    | NULL      |
+│   │       | Bob      | Alice     |
+│   │       | Carol    | Alice     |
+│   │       | Dave     | Bob       |
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - Always alias tables in self joins to avoid ambiguity.
+│   │       - Use `LEFT JOIN` if you want to include top-level entities (like employees without managers).
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Clearly name aliases (`parent`, `child`, `e1`, `e2`) to reflect relationships.
+│   │       - Ensure proper indexing on the columns used for self-referencing (like `manager_id`).
+│   │
+│   │       ---
+│   │       ⚡ **Use Cases:**
+│   │       - Organizational charts.
+│   │       - Product categories & subcategories.
+│   │       - Detecting duplicates or comparing row values within the same table.
+│   │
+│   │
+│   ├── JOIN_Conditions_ON_vs_USING/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: Define how tables are linked in JOIN operations.
+│   │
+│   │       There are two main ways to specify join conditions:
+│   │
+│   │       ---
+│   │       📌 **1. Using `ON` Clause**:
+│   │       - Most flexible.
+│   │       - Allows joining on different column names or complex conditions.
+│   │
+│   │       Example:
+│   │       ```sql
+│   │       SELECT e.name, d.dept_name
+│   │       FROM employees e
+│   │       JOIN departments d
+│   │       ON e.dept_id = d.dept_id;
+│   │       ```
+│   │
+│   │       - Supports compound conditions:
+│   │       ```sql
+│   │       ON a.id = b.id AND a.status = b.status
+│   │       ```
+│   │
+│   │       ---
+│   │       📌 **2. Using `USING` Clause**:
+│   │       - Simpler syntax when **both tables share a column with the same name**.
+│   │       - Automatically removes duplicate column from output.
+│   │
+│   │       Example:
+│   │       ```sql
+│   │       SELECT *
+│   │       FROM employees
+│   │       JOIN departments
+│   │       USING (dept_id);
+│   │       ```
+│   │
+│   │       - Equivalent to:
+│   │       ```sql
+│   │       ON employees.dept_id = departments.dept_id
+│   │       ```
+│   │
+│   │       ---
+│   │       🚨 **Important Differences:**
+│   │       | Feature           | ON Clause          | USING Clause     |
+│   │       |-------------------|--------------------|------------------|
+│   │       | Column Names      | Can differ         | Must be identical|
+│   │       | Output Columns    | Both shown         | One shown        |
+│   │       | Complex Conditions| Supported          | Not supported    |
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Use `USING` for **simple joins** where column names match exactly.
+│   │       - Use `ON` when:
+│   │         - Column names differ.
+│   │         - You need multiple conditions.
+│   │         - You want full control over join logic.
+│   │
+│   │       Example:
+│   │       ```sql
+│   │       -- Prefer ON for clarity in complex joins
+│   │       JOIN orders o ON o.customer_id = c.id AND o.status = 'active'
+│   │       ```
+│   │
+│   │       ---
+│   │       ⚡ **Note:**
+│   │       - Both `ON` and `USING` can be used with `INNER`, `LEFT`, `RIGHT` joins.
+│   │       - Avoid mixing styles in large queries—be consistent!
+│   │
+│   │
+├── Subqueries/
+│   ├── Scalar_Subquery/
+│   │   └── Explanation:
+│   │       🔹 **What is a Scalar Subquery?**
+│   │       - A **Scalar Subquery** returns exactly **one value** (one row, one column).
+│   │       - It’s often used where a single value is expected, like in `SELECT`, `WHERE`, or `SET`.
+│   │
+│   │       ---
+│   │       📌 **Syntax Example**:
+│   │       ```sql
+│   │       SELECT name, salary
+│   │       FROM employees
+│   │       WHERE salary > (
+│   │           SELECT AVG(salary) FROM employees
+│   │       );
+│   │       ```
+│   │       - This query fetches employees earning **above average salary**.
+│   │
+│   │       ---
+│   │       📊 **Visualization**:
+│   │       1️⃣ Inner Query:
+│   │       ```sql
+│   │       SELECT AVG(salary) FROM employees;
+│   │       -- Returns: 55000
+│   │       ```
+│   │
+│   │       2️⃣ Outer Query becomes:
+│   │       ```sql
+│   │       WHERE salary > 55000
+│   │       ```
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - The subquery **must return exactly one value**.
+│   │       - If it returns more than one row → MySQL error:
+│   │         ```
+│   │         Error: Subquery returns more than 1 row
+│   │         ```
+│   │
+│   │       - Use `LIMIT 1` if necessary to enforce single-row return.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Use Scalar Subqueries for dynamic thresholds, calculations, or lookup values.
+│   │       - Ensure inner queries are efficient — they may execute per row depending on context.
+│   │
+│   │       ---
+│   │       ⚡ **Example in SELECT Clause**:
+│   │       ```sql
+│   │       SELECT name,
+│   │              (SELECT dept_name FROM departments d WHERE d.dept_id = e.dept_id) AS department
+│   │       FROM employees e;
+│   │       ```
+│   │       - Here, the subquery dynamically fetches department names.
+│   │
+│   │
+│   ├── Correlated_Subquery/
+│   │   └── Explanation:
+│   │       🔹 **What is a Correlated Subquery?**
+│   │       - A **Correlated Subquery** references columns from the **outer query**.
+│   │       - It is **executed once per row** of the outer query.
+│   │       - Used for row-by-row comparisons.
+│   │
+│   │       ---
+│   │       📌 **Syntax Example**:
+│   │       ```sql
+│   │       SELECT name, salary
+│   │       FROM employees e
+│   │       WHERE salary > (
+│   │           SELECT AVG(salary)
+│   │           FROM employees
+│   │           WHERE dept_id = e.dept_id
+│   │       );
+│   │       ```
+│   │       - This returns employees earning **above the average salary of their own department**.
+│   │
+│   │       ---
+│   │       📊 **How It Works**:
+│   │       - For **each employee row**, the subquery calculates the department’s average salary.
+│   │       - Then compares the current employee’s salary to that value.
+│   │
+│   │       ---
+│   │       🚨 **Performance Warning:**
+│   │       - Correlated subqueries can be **slow** on large datasets because the inner query runs per outer row.
+│   │       - Often better replaced by a `JOIN` with precomputed aggregates.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Use correlated subqueries for:
+│   │         - Existence checks.
+│   │         - Complex conditions that are hard to express with joins.
+│   │
+│   │       - Where possible, refactor like this:
+│   │       ```sql
+│   │       SELECT e.name, e.salary
+│   │       FROM employees e
+│   │       JOIN (
+│   │           SELECT dept_id, AVG(salary) AS avg_sal
+│   │           FROM employees
+│   │           GROUP BY dept_id
+│   │       ) d_avg
+│   │       ON e.dept_id = d_avg.dept_id
+│   │       WHERE e.salary > d_avg.avg_sal;
+│   │       ```
+│   │       - This avoids repetitive subquery execution.
+│   │
+│   │       ---
+│   │       ⚡ **Use Cases:**
+│   │       - "Find employees who earn more than anyone in department X."
+│   │       - "Select products priced above the category average."
+│   │
+│   │
