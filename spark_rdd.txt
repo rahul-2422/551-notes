@@ -1,0 +1,780 @@
+DataFrame_&_SQL_Query_Mastery/
+└── DataFrame_Operations/
+    └── select/
+        ├── Syntax:
+        │   DataFrame API:
+        │   ├── df.select("Name", "Age")
+        │   ├── df[["Name", "Age"]]
+        │   SQL Equivalent:
+        │   └── SELECT Name, Age FROM employees
+        │
+        ├── How_It_Works:
+        │   ├── Type: Transformation (Lazy)
+        │   ├── Extracts specified columns from DataFrame.
+        │   └── Doesn't trigger computation until an Action is called.
+        │
+        ├── Dry_Run:
+        │   ├── Input DataFrame:
+        │   │     +-------+---+------+
+        │   │     | Name  |Age| Dept |
+        │   │     +-------+---+------+
+        │   │     | Alice | 30|  IT  |
+        │   │     | Bob   | 28|  HR  |
+        │   │     +-------+---+------+
+        │   │
+        │   ├── Operation:
+        │   │     df.select("Name", "Age")
+        │   │
+        │   └── Output:
+        │         +-------+---+
+        │         | Name  |Age|
+        │         +-------+---+
+        │         | Alice | 30|
+        │         | Bob   | 28|
+        │         +-------+---+
+        │
+        ├── Lazy_Evaluation_Impact:
+        │   ├── Builds Logical Plan only.
+        │   ├── No execution until actions like `.show()`, `.collect()`.
+        │   └── Enables Catalyst Optimizer to rearrange operations.
+        │
+        └── Multiple_Approaches:
+            ├── Goal: Select columns `Name` and `Age`.
+            ├── DataFrame API:
+            │     df.select("Name", "Age").show()
+            │
+            ├── SQL Approach:
+            │     df.createOrReplaceTempView("employees")
+            │     spark.sql("SELECT Name, Age FROM employees").show()
+            │
+            └── RDD Approach:
+                  rdd = df.rdd.map(lambda row: (row['Name'], row['Age']))
+                  rdd.collect()
+    └── filter/
+        ├── Syntax:
+        │   DataFrame API:
+        │   ├── df.filter(df.Age > 28)
+        │   ├── df.where("Age > 28")
+        │   SQL Equivalent:
+        │   └── SELECT * FROM employees WHERE Age > 28
+        │
+        ├── How_It_Works:
+        │   ├── Type: Transformation (Lazy)
+        │   ├── Filters rows based on given condition.
+        │   └── Accepts both column expressions and SQL strings.
+        │
+        ├── Dry_Run:
+        │   ├── Input DataFrame:
+        │   │     +-------+---+------+
+        │   │     | Name  |Age| Dept |
+        │   │     +-------+---+------+
+        │   │     | Alice | 30|  IT  |
+        │   │     | Bob   | 28|  HR  |
+        │   │     | Carol | 35|  IT  |
+        │   │     +-------+---+------+
+        │   │
+        │   ├── Operation:
+        │   │     df.filter(df.Age > 28)
+        │   │
+        │   └── Output:
+        │         +-------+---+------+
+        │         | Name  |Age| Dept |
+        │         +-------+---+------+
+        │         | Alice | 30|  IT  |
+        │         | Carol | 35|  IT  |
+        │         +-------+---+------+
+        │
+        ├── Lazy_Evaluation_Impact:
+        │   ├── Adds a filter node to Logical Plan.
+        │   ├── Execution deferred until an Action is called.
+        │   └── Predicate Pushdown optimizes filtering early in execution.
+        │
+        └── Multiple_Approaches:
+            ├── Goal: Filter employees where Age > 28.
+            ├── DataFrame API:
+            │     df.filter(df.Age > 28).show()
+            │
+            ├── SQL Approach:
+            │     df.createOrReplaceTempView("employees")
+            │     spark.sql("SELECT * FROM employees WHERE Age > 28").show()
+            │
+            └── RDD Approach:
+                  rdd = df.rdd.filter(lambda row: row['Age'] > 28)
+                  rdd.collect()
+    └── withColumn/
+        ├── Syntax:
+        │   DataFrame API:
+        │   ├── df.withColumn("AgePlus5", df.Age + 5)
+        │   ├── df.withColumn("UpperDept", fc.upper(df.Dept))
+        │   SQL Equivalent:
+        │   └── SELECT Name, Age, Dept, (Age + 5) AS AgePlus5 FROM employees
+        │
+        ├── How_It_Works:
+        │   ├── Type: Transformation (Lazy)
+        │   ├── Adds a new column or updates an existing column.
+        │   └── Uses expressions or functions from `pyspark.sql.functions`.
+        │
+        ├── Dry_Run:
+        │   ├── Input DataFrame:
+        │   │     +-------+---+------+
+        │   │     | Name  |Age| Dept |
+        │   │     +-------+---+------+
+        │   │     | Alice | 30|  IT  |
+        │   │     | Bob   | 28|  HR  |
+        │   │     +-------+---+------+
+        │   │
+        │   ├── Operation:
+        │   │     df.withColumn("AgePlus5", df.Age + 5)
+        │   │
+        │   └── Output:
+        │         +-------+---+------+----------+
+        │         | Name  |Age| Dept | AgePlus5 |
+        │         +-------+---+------+----------+
+        │         | Alice | 30|  IT  |   35     |
+        │         | Bob   | 28|  HR  |   33     |
+        │         +-------+---+------+----------+
+        │
+        ├── Lazy_Evaluation_Impact:
+        │   ├── Appends column transformation to Logical Plan.
+        │   ├── No computation happens until an Action is triggered.
+        │   └── Optimized via Catalyst for expression simplification.
+        │
+        └── Multiple_Approaches:
+            ├── Goal: Add a column `AgePlus5` where Age + 5.
+            ├── DataFrame API:
+            │     df.withColumn("AgePlus5", df.Age + 5).show()
+            │
+            ├── SQL Approach:
+            │     df.createOrReplaceTempView("employees")
+            │     spark.sql("SELECT *, Age + 5 AS AgePlus5 FROM employees").show()
+            │
+            └── RDD Approach:
+                  rdd = df.rdd.map(lambda row: (row['Name'], row['Age'], row['Dept'], row['Age'] + 5))
+                  rdd.collect()
+    └── groupBy/
+        ├── Syntax:
+        │   DataFrame API:
+        │   ├── df.groupBy("Dept").count()
+        │   ├── df.groupBy("Dept").agg(fc.avg("Age"))
+        │   SQL Equivalent:
+        │   └── SELECT Dept, COUNT(*) FROM employees GROUP BY Dept
+        │
+        ├── How_It_Works:
+        │   ├── Type: Transformation (Lazy)
+        │   ├── Groups rows based on column(s) and prepares for aggregation.
+        │   └── Requires an aggregation function (e.g., count, avg, sum) to trigger execution.
+        │
+        ├── Dry_Run:
+        │   ├── Input DataFrame:
+        │   │     +-------+---+------+
+        │   │     | Name  |Age| Dept |
+        │   │     +-------+---+------+
+        │   │     | Alice | 30|  IT  |
+        │   │     | Bob   | 28|  HR  |
+        │   │     | Carol | 35|  IT  |
+        │   │     +-------+---+------+
+        │   │
+        │   ├── Operation:
+        │   │     df.groupBy("Dept").count()
+        │   │
+        │   └── Output:
+        │         +------+-----+
+        │         | Dept |count|
+        │         +------+-----+
+        │         |  IT  |  2  |
+        │         |  HR  |  1  |
+        │         +------+-----+
+        │
+        ├── Lazy_Evaluation_Impact:
+        │   ├── Builds groupBy node in Logical Plan.
+        │   ├── Aggregation triggers execution.
+        │   └── Optimized via aggregation pushdown and partial aggregation.
+        │
+        └── Multiple_Approaches:
+            ├── Goal: Count employees in each Dept.
+            ├── DataFrame API:
+            │     df.groupBy("Dept").count().show()
+            │
+            ├── SQL Approach:
+            │     df.createOrReplaceTempView("employees")
+            │     spark.sql("SELECT Dept, COUNT(*) FROM employees GROUP BY Dept").show()
+            │
+            └── RDD Approach:
+                  rdd = df.rdd.map(lambda row: (row['Dept'], 1)) \
+                               .reduceByKey(lambda a, b: a + b)
+                  rdd.collect()
+    └── join/
+        ├── Syntax:
+        │   DataFrame API:
+        │   ├── df1.join(df2, df1.ID == df2.EmpID, "inner")
+        │   ├── df1.join(df2, ["Dept"], "left")
+        │   SQL Equivalent:
+        │   └── SELECT * FROM df1 INNER JOIN df2 ON df1.ID = df2.EmpID
+        │
+        ├── How_It_Works:
+        │   ├── Type: Transformation (Lazy)
+        │   ├── Performs relational join between two DataFrames.
+        │   ├── Supports join types: inner, left, right, outer, cross.
+        │   └── Joins are optimized using broadcast joins or sort-merge joins based on data size.
+        │
+        ├── Dry_Run:
+        │   ├── Input DataFrames:
+        │   │     df1:
+        │   │     +----+------+
+        │   │     | ID | Name |
+        │   │     +----+------+
+        │   │     |  1 | Alice|
+        │   │     |  2 | Bob  |
+        │   │     +----+------+
+        │   │
+        │   │     df2:
+        │   │     +------+-------+
+        │   │     | EmpID| Dept  |
+        │   │     +------+-------+
+        │   │     |   1  |  IT   |
+        │   │     |   3  |  HR   |
+        │   │     +------+-------+
+        │   │
+        │   ├── Operation:
+        │   │     df1.join(df2, df1.ID == df2.EmpID, "inner")
+        │   │
+        │   └── Output:
+        │         +----+------+-------+
+        │         | ID | Name | Dept  |
+        │         +----+------+-------+
+        │         |  1 | Alice|  IT   |
+        │         +----+------+-------+
+        │
+        ├── Lazy_Evaluation_Impact:
+        │   ├── Join logic added to Logical Plan.
+        │   ├── Execution triggered by actions.
+        │   └── Optimizer decides best join strategy (e.g., broadcast if one table is small).
+        │
+        └── Multiple_Approaches:
+            ├── Goal: Inner join employees on matching IDs.
+            ├── DataFrame API:
+            │     df1.join(df2, df1.ID == df2.EmpID, "inner").show()
+            │
+            ├── SQL Approach:
+            │     df1.createOrReplaceTempView("df1")
+            │     df2.createOrReplaceTempView("df2")
+            │     spark.sql("SELECT * FROM df1 INNER JOIN df2 ON df1.ID = df2.EmpID").show()
+            │
+            └── RDD Approach:
+                  rdd1 = df1.rdd.map(lambda row: (row['ID'], row['Name']))
+                  rdd2 = df2.rdd.map(lambda row: (row['EmpID'], row['Dept']))
+                  rdd1.join(rdd2).collect()
+    └── orderBy/
+        ├── Syntax:
+        │   DataFrame API:
+        │   ├── df.orderBy("Age")
+        │   ├── df.orderBy(df.Age.desc())
+        │   SQL Equivalent:
+        │   └── SELECT * FROM employees ORDER BY Age ASC
+        │
+        ├── How_It_Works:
+        │   ├── Type: Transformation (Lazy)
+        │   ├── Sorts the DataFrame based on one or more columns.
+        │   ├── Supports ascending (default) and descending order.
+        │   └── Triggers shuffle for global sorting across partitions.
+        │
+        ├── Dry_Run:
+        │   ├── Input DataFrame:
+        │   │     +-------+---+------+
+        │   │     | Name  |Age| Dept |
+        │   │     +-------+---+------+
+        │   │     | Alice | 30|  IT  |
+        │   │     | Bob   | 28|  HR  |
+        │   │     | Carol | 35|  IT  |
+        │   │     +-------+---+------+
+        │   │
+        │   ├── Operation:
+        │   │     df.orderBy("Age")
+        │   │
+        │   └── Output:
+        │         +-------+---+------+
+        │         | Name  |Age| Dept |
+        │         +-------+---+------+
+        │         | Bob   | 28|  HR  |
+        │         | Alice | 30|  IT  |
+        │         | Carol | 35|  IT  |
+        │         +-------+---+------+
+        │
+        ├── Lazy_Evaluation_Impact:
+        │   ├── Sorting step added to Logical Plan.
+        │   ├── Actual sort happens during execution.
+        │   └── May involve expensive shuffling for large datasets.
+        │
+        └── Multiple_Approaches:
+            ├── Goal: Sort employees by Age ascending.
+            ├── DataFrame API:
+            │     df.orderBy("Age").show()
+            │
+            ├── SQL Approach:
+            │     df.createOrReplaceTempView("employees")
+            │     spark.sql("SELECT * FROM employees ORDER BY Age").show()
+            │
+            └── RDD Approach:
+                  rdd = df.rdd.sortBy(lambda row: row['Age'])
+                  rdd.collect()
+    └── distinct/
+        ├── Syntax:
+        │   DataFrame API:
+        │   ├── df.distinct()
+        │   SQL Equivalent:
+        │   └── SELECT DISTINCT * FROM employees
+        │
+        ├── How_It_Works:
+        │   ├── Type: Transformation (Lazy)
+        │   ├── Removes duplicate rows from the DataFrame.
+        │   └── Internally performs shuffle to group and eliminate duplicates.
+        │
+        ├── Dry_Run:
+        │   ├── Input DataFrame:
+        │   │     +-------+---+------+
+        │   │     | Name  |Age| Dept |
+        │   │     +-------+---+------+
+        │   │     | Alice | 30|  IT  |
+        │   │     | Bob   | 28|  HR  |
+        │   │     | Alice | 30|  IT  |
+        │   │     +-------+---+------+
+        │   │
+        │   ├── Operation:
+        │   │     df.distinct()
+        │   │
+        │   └── Output:
+        │         +-------+---+------+
+        │         | Name  |Age| Dept |
+        │         +-------+---+------+
+        │         | Alice | 30|  IT  |
+        │         | Bob   | 28|  HR  |
+        │         +-------+---+------+
+        │
+        ├── Lazy_Evaluation_Impact:
+        │   ├── Deduplication step added to Logical Plan.
+        │   ├── Execution deferred until an Action is called.
+        │   └── Shuffle-heavy operation; avoid on very large datasets unless necessary.
+        │
+        └── Multiple_Approaches:
+            ├── Goal: Remove duplicate rows from employees.
+            ├── DataFrame API:
+            │     df.distinct().show()
+            │
+            ├── SQL Approach:
+            │     df.createOrReplaceTempView("employees")
+            │     spark.sql("SELECT DISTINCT * FROM employees").show()
+            │
+            └── RDD Approach:
+                  rdd = df.rdd.distinct()
+                  rdd.collect()
+    └── aggregate/
+        ├── Syntax:
+        │   DataFrame API:
+        │   ├── df.agg(fc.max("Age"))
+        │   ├── df.groupBy("Dept").agg(fc.avg("Age"))
+        │   SQL Equivalent:
+        │   └── SELECT Dept, AVG(Age) FROM employees GROUP BY Dept
+        │
+        ├── How_It_Works:
+        │   ├── Type: Transformation (Lazy)
+        │   ├── Performs aggregation functions like COUNT, AVG, MAX, MIN, SUM.
+        │   ├── Can be used globally or with groupBy.
+        │   └── Requires action to trigger computation.
+        │
+        ├── Dry_Run:
+        │   ├── Input DataFrame:
+        │   │     +-------+---+------+
+        │   │     | Name  |Age| Dept |
+        │   │     +-------+---+------+
+        │   │     | Alice | 30|  IT  |
+        │   │     | Bob   | 28|  HR  |
+        │   │     | Carol | 35|  IT  |
+        │   │     +-------+---+------+
+        │   │
+        │   ├── Operation:
+        │   │     df.groupBy("Dept").agg(fc.avg("Age"))
+        │   │
+        │   └── Output:
+        │         +------+--------+
+        │         | Dept | avg(Age)|
+        │         +------+--------+
+        │         |  IT  |   32.5  |
+        │         |  HR  |   28.0  |
+        │         +------+--------+
+        │
+        ├── Lazy_Evaluation_Impact:
+        │   ├── Aggregation node added to Logical Plan.
+        │   ├── Execution optimized via partial aggregations.
+        │   └── Triggers shuffle when grouping is involved.
+        │
+        └── Multiple_Approaches:
+            ├── Goal: Compute average Age by Dept.
+            ├── DataFrame API:
+            │     df.groupBy("Dept").agg(fc.avg("Age")).show()
+            │
+            ├── SQL Approach:
+            │     df.createOrReplaceTempView("employees")
+            │     spark.sql("SELECT Dept, AVG(Age) FROM employees GROUP BY Dept").show()
+            │
+            └── RDD Approach:
+                  rdd = df.rdd.map(lambda row: (row['Dept'], (row['Age'], 1))) \
+                               .reduceByKey(lambda a, b: (a[0] + b[0], a[1] + b[1])) \
+                               .mapValues(lambda x: x[0] / x[1])
+                  rdd.collect()
+
+└── Lazy_Evaluation_Explained/
+    └── Overview:
+        ├── Definition:
+        │   Lazy evaluation means Spark **does not execute transformations immediately**.
+        │   Instead, it builds a **Logical Plan** and waits until an Action (like `.show()`, `.collect()`) is called.
+        │
+        ├── How It Works:
+        │   ├── 1️⃣ Transformations (e.g., select, filter, join):
+        │   │      - Recorded as steps in a Directed Acyclic Graph (**DAG**).
+        │   │      - No data movement or computation happens yet.
+        │   │
+        │   ├── 2️⃣ Action Trigger:
+        │   │      - When an Action is called, Spark submits the job.
+        │   │      - The **Catalyst Optimizer** rewrites the Logical Plan into an efficient Physical Plan.
+        │   │
+        │   └── 3️⃣ Execution:
+        │          - Tasks are distributed across the cluster for execution.
+        │
+        ├── Example:
+        │   ```python
+        │   df_filtered = df.filter(df.Age > 30)      # Lazy
+        │   df_selected = df_filtered.select("Name")  # Lazy
+        │   df_selected.show()                        # Action triggers execution
+        │   ```
+        │
+        ├── Benefits:
+        │   ├── ✅ **Optimization Opportunities**:
+        │   │      - Combines multiple transformations before execution (pipelining).
+        │   │      - Removes unnecessary computations (e.g., unused columns via pruning).
+        │   ├── ✅ **Reduced Data Shuffling**.
+        │   └── ✅ **Fault Tolerance** through recomputation using the DAG lineage.
+        │
+        ├── Common Actions That Trigger Execution:
+        │   - `.show()`, `.collect()`, `.count()`, `.write()`, `.first()`
+        │
+        └── Key Takeaways:
+            ├── Only Actions trigger Spark jobs.
+            ├── Use caching (`df.cache()`) to avoid recomputation if reusing DataFrames.
+            ├── Design queries knowing that Spark will optimize the full chain before execution.
+            └── Watch out for wide transformations (e.g., groupBy, join) that cause shuffles when executed.
+
+DataFrame_&_SQL_Query_Mastery/
+└── Query_Solutions_Examples/
+    └── Overview_Simple_Queries:
+        ├── Common_Query_Patterns:
+        │   ├── Filtering:
+        │   │     df.filter(df.Age > 30)
+        │   │     SQL: SELECT * FROM employees WHERE Age > 30
+        │   │
+        │   ├── Grouping & Aggregations:
+        │   │     df.groupBy("Dept").agg(fc.avg("Salary"))
+        │   │     SQL: SELECT Dept, AVG(Salary) FROM employees GROUP BY Dept
+        │   │
+        │   ├── Handling Nulls:
+        │   │     df.fillna({'Salary': 0})
+        │   │     df.filter(df.Name.isNotNull())
+        │   │     SQL: SELECT * FROM employees WHERE Name IS NOT NULL
+        │   │
+        │   ├── Data Type Casting:
+        │   │     df.withColumn("Salary", df.Salary.cast("Integer"))
+        │   │     SQL: SELECT CAST(Salary AS INT) FROM employees
+        │   │
+        │   ├── Joins (Inner, Left, Right, Outer):
+        │   │     df1.join(df2, "ID", "left")
+        │   │     SQL: SELECT * FROM df1 LEFT JOIN df2 ON df1.ID = df2.ID
+        │   │
+        │   └── Window Functions:
+        │         (If covered) Example:
+        │         w = Window.partitionBy("Dept").orderBy(df.Salary.desc())
+        │         df.withColumn("Rank", fc.rank().over(w))
+        │         SQL: ROW_NUMBER() OVER (PARTITION BY Dept ORDER BY Salary DESC)
+        │
+        ├── Example_1_Filter_and_Sort:
+        │   ├── Goal: Find employees older than 30, sorted by Age.
+        │   ├── DataFrame API:
+        │   │     df.filter(df.Age > 30).orderBy("Age").show()
+        │   ├── SQL:
+        │   │     spark.sql("SELECT * FROM employees WHERE Age > 30 ORDER BY Age").show()
+        │   └── RDD:
+        │         df.rdd.filter(lambda x: x['Age'] > 30).sortBy(lambda x: x['Age']).collect()
+        │
+        ├── Example_2_Aggregate_By_Group:
+        │   ├── Goal: Average Salary per Department.
+        │   ├── DataFrame API:
+        │   │     df.groupBy("Dept").agg(fc.avg("Salary")).show()
+        │   ├── SQL:
+        │   │     spark.sql("SELECT Dept, AVG(Salary) FROM employees GROUP BY Dept").show()
+        │   └── RDD:
+        │         df.rdd.map(lambda x: (x['Dept'], (x['Salary'],1))) \
+        │               .reduceByKey(lambda a,b: (a[0]+b[0], a[1]+b[1])) \
+        │               .mapValues(lambda x: x[0]/x[1]).collect()
+        │
+        ├── Example_3_Join_Operations:
+        │   ├── Goal: Left join employees with departments.
+        │   ├── DataFrame API:
+        │   │     df1.join(df2, "DeptID", "left").show()
+        │   ├── SQL:
+        │   │     spark.sql("SELECT * FROM emp LEFT JOIN dept ON emp.DeptID = dept.ID").show()
+        │   └── RDD:
+        │         rdd1.leftOuterJoin(rdd2).collect()
+        │
+        ├── ETL_Pipelines_in_Spark:
+        │   ├── Extract:
+        │   │     df = spark.read.csv("employees.csv", header=True, inferSchema=True)
+        │   │
+        │   ├── Transform:
+        │   │     df_clean = df.filter(df.Salary.isNotNull()) \
+        │   │                      .withColumn("Salary", df.Salary.cast("Integer"))
+        │   │
+        │   ├── Load:
+        │   │     df_clean.write.parquet("cleaned_employees.parquet")
+        │   │
+        │   └── Notes:
+        │         - Use `.cache()` for reused DataFrames.
+        │         - Prefer columnar formats like Parquet for efficient storage.
+        │         - Handle schema evolution carefully.
+        │
+        └── Key_Takeaways:
+            ├── Always prefer DataFrame API or SQL for optimizations.
+            ├── Use RDDs only for low-level transformations not supported by DataFrames.
+            ├── Watch for shuffles in joins, groupBy, distinct.
+            ├── Handle nulls and data types early in ETL.
+            └── Use window functions for advanced analytics where supported.
+
+    └── Complex_Queries:
+        ├── Common_Query_Patterns:
+        │   ├── Filtering:
+        │   │     df.filter((df.Age > 30) & (df.Dept == 'IT'))
+        │   │     SQL: SELECT * FROM employees WHERE Age > 30 AND Dept = 'IT'
+        │   │
+        │   ├── Grouping & Aggregations (Advanced):
+        │   │     df.groupBy("Dept").agg(
+        │   │         fc.avg("Salary").alias("AvgSalary"),
+        │   │         fc.max("Salary").alias("MaxSalary"),
+        │   │         fc.count("*").alias("EmployeeCount")
+        │   │     )
+        │   │     SQL:
+        │   │     SELECT Dept, AVG(Salary), MAX(Salary), COUNT(*) FROM employees GROUP BY Dept
+        │   │
+        │   ├── Handling Nulls:
+        │   │     df.na.fill({"Salary": 0}).filter(df.Name.isNotNull())
+        │   │
+        │   ├── Joins on Different Column Names + Condition:
+        │   │     df_emp.join(df_dept, df_emp.DeptID == df_dept.ID) \
+        │   │           .filter(df_dept.Location == 'NY')
+        │   │     SQL:
+        │   │     SELECT * FROM emp e JOIN dept d ON e.DeptID = d.ID WHERE d.Location = 'NY'
+        │   │
+        │   ├── orderBy Descending:
+        │   │     df.orderBy(df.Salary.desc())
+        │   │     SQL: SELECT * FROM employees ORDER BY Salary DESC
+        │   │
+        │   └── Window Functions (Ranking within Dept by Salary):
+        │         w = Window.partitionBy("Dept").orderBy(df.Salary.desc())
+        │         df.withColumn("Rank", fc.rank().over(w))
+        │
+        ├── Example_1_Join_On_Different_Columns_With_Filter:
+        │   ├── Goal: Join employees with departments where DeptID = ID and Location = 'NY'.
+        │   ├── Sample Input:
+        │   │     employees (df_emp):
+        │   │     +-----+--------+-------+
+        │   │     | EmpID| Name   | DeptID|
+        │   │     +-----+--------+-------+
+        │   │     |   1 | Alice  |   10  |
+        │   │     |   2 | Bob    |   20  |
+        │   │     |   3 | Carol  |   10  |
+        │   │
+        │   │     departments (df_dept):
+        │   │     +----+-------+----------+
+        │   │     | ID | Dept  | Location |
+        │   │     +----+-------+----------+
+        │   │     | 10 |  IT   |   NY     |
+        │   │     | 20 |  HR   |   SF     |
+        │   │
+        │   ├── DataFrame API:
+        │   │     df_emp.join(df_dept, df_emp.DeptID == df_dept.ID) \
+        │   │          .filter(df_dept.Location == 'NY').select("Name", "Dept", "Location").show()
+        │   │
+        │   ├── DataFrame API Dry Run:
+        │   │     Step 1: Join on df_emp.DeptID == df_dept.ID
+        │   │     +-----+--------+-------+----+-------+----------+
+        │   │     |EmpID| Name   | DeptID| ID | Dept  | Location |
+        │   │     +-----+--------+-------+----+-------+----------+
+        │   │     |  1  | Alice  |  10   | 10 |  IT   |   NY     |
+        │   │     |  2  | Bob    |  20   | 20 |  HR   |   SF     |
+        │   │     |  3  | Carol  |  10   | 10 |  IT   |   NY     |
+        │   │
+        │   │     Step 2: Filter Location == 'NY'
+        │   │     +-----+--------+-------+----+-------+----------+
+        │   │     |  1  | Alice  |  10   | 10 |  IT   |   NY     |
+        │   │     |  3  | Carol  |  10   | 10 |  IT   |   NY     |
+        │   │
+        │   │     Step 3: Select Name, Dept, Location
+        │   │     +--------+-------+----------+
+        │   │     | Name   | Dept  | Location |
+        │   │     +--------+-------+----------+
+        │   │     | Alice  |  IT   |   NY     |
+        │   │     | Carol  |  IT   |   NY     |
+        │   │
+        │   ├── SQL:
+        │   │     spark.sql("""
+        │   │     SELECT e.Name, d.Dept, d.Location
+        │   │     FROM emp e JOIN dept d
+        │   │     ON e.DeptID = d.ID
+        │   │     WHERE d.Location = 'NY'
+        │   │     """).show()
+        │   ├── RDD:
+        │   │     rdd_emp.map(lambda x: (x['DeptID'], x)) \
+        │   │            .join(rdd_dept.map(lambda x: (x['ID'], x))) \
+        │   │            .filter(lambda x: x[1][1]['Location'] == 'NY') \
+        │   │            .map(lambda x: (x[1][0]['Name'], x[1][1]['Dept'], x[1][1]['Location'])) \
+        │   │            .collect()
+        │   │  
+        │   └── RDD Dry Run:
+        │         Step 1: Map to (DeptID, Row)
+        │         emp_rdd: [(10, Alice), (20, Bob), (10, Carol)]
+        │         dept_rdd: [(10, IT-NY), (20, HR-SF)]
+        │
+        │         Step 2: Join on DeptID
+        │         [(10, (Alice, IT-NY)), (20, (Bob, HR-SF)), (10, (Carol, IT-NY))]
+        │
+        │         Step 3: Filter where Location == 'NY'
+        │         [(10, (Alice, IT-NY)), (10, (Carol, IT-NY))]
+        │
+        │         Step 4: Extract (Name, Dept, Location)
+        │         [(Alice, IT, NY), (Carol, IT, NY)]
+        │
+        ├── Example_2_GroupBy_With_Multiple_Aggregations:
+        │   ├── Goal: For each Dept, get Avg, Max Salary, and Employee Count.
+        │   ├── Sample Input:
+        │   │     +--------+-------+--------+
+        │   │     | Name   | Dept  | Salary |
+        │   │     +--------+-------+--------+
+        │   │     | Alice  |  IT   |  1000  |
+        │   │     | Bob    |  HR   |   800  |
+        │   │     | Carol  |  IT   |  1200  |
+        │   │     | David  |  HR   |   900  |
+        │   │
+        │   ├── DataFrame API:
+        │   │     df.groupBy("Dept").agg(
+        │   │         fc.avg("Salary").alias("AvgSalary"),
+        │   │         fc.max("Salary").alias("MaxSalary"),
+        │   │         fc.count("*").alias("Count")
+        │   │     ).show()
+        │   │
+        │   ├── DataFrame API Dry Run:
+        │   │     Step 1: groupBy("Dept")
+        │   │     Groups: { IT: [1000,1200], HR: [800,900] }
+        │   │
+        │   │     Step 2: Apply Aggregations
+        │   │     +-------+---------+---------+-------------+
+        │   │     | Dept  | AvgSalary| MaxSalary| EmployeeCount|
+        │   │     +-------+---------+---------+-------------+
+        │   │     |  IT   |  1100   |  1200   |      2      |
+        │   │     |  HR   |   850   |   900   |      2      |
+        │   │
+        │   ├── SQL:
+        │   │     spark.sql("""
+        │   │     SELECT Dept, AVG(Salary) AS AvgSalary, MAX(Salary) AS MaxSalary, COUNT(*) AS Count
+        │   │     FROM employees GROUP BY Dept
+        │   │     """).show()
+        │   ├── RDD:
+        │   │     df.rdd.map(lambda x: (x['Dept'], (x['Salary'], x['Salary'], 1))) \
+        │   │         .reduceByKey(lambda a,b: (a[0]+b[0], max(a[1], b[1]), a[2]+b[2])) \
+        │   │         .mapValues(lambda x: (x[0]/x[2], x[1], x[2])) \
+        │   │         .collect()
+        │   │
+        │   └── RDD Dry Run:
+        │         Step 1: Map to (Dept, (Salary, Salary, 1))
+        │         [('IT', (1000,1000,1)), ('HR',(800,800,1)), ...]
+        │
+        │         Step 2: ReduceByKey
+        │         IT -> (2200, 1200, 2)
+        │         HR -> (1700, 900, 2)
+        │
+        │         Step 3: Compute Avg
+        │         IT -> (1100, 1200, 2)
+        │         HR -> (850, 900, 2)
+        │
+        ├── Example_3_OrderBy_Desc_With_Filter:
+        │   ├── Goal: List IT employees ordered by Salary descending.
+        │   ├── Sample Input:
+        │   │     +--------+-------+--------+
+        │   │     | Name   | Dept  | Salary |
+        │   │     +--------+-------+--------+
+        │   │     | Alice  |  IT   |  1000  |
+        │   │     | Carol  |  IT   |  1200  |
+        │   │     | Bob    |  HR   |   800  |
+        │   │
+        │   ├── DataFrame API:
+        │   │     df.filter(df.Dept == 'IT').orderBy(df.Salary.desc()).show()
+        │   │
+        │   ├── DataFrame API Dry Run:
+        │   │     Step 1: Filter Dept == 'IT'
+        │   │     +--------+-------+--------+
+        │   │     | Alice  |  IT   |  1000  |
+        │   │     | Carol  |  IT   |  1200  |
+        │   │
+        │   │     Step 2: orderBy Salary DESC
+        │   │     +--------+-------+--------+
+        │   │     | Carol  |  IT   |  1200  |
+        │   │     | Alice  |  IT   |  1000  |
+        │   │
+        │   ├── SQL:
+        │   │     spark.sql("SELECT * FROM employees WHERE Dept = 'IT' ORDER BY Salary DESC").show()
+        │   ├── RDD:
+        │   │     df.rdd.filter(lambda x: x['Dept']=='IT').sortBy(lambda x: -x['Salary']).collect()
+        │   │
+        │   └── RDD Dry Run:
+        │         Step 1: Filter by Dept == 'IT'
+        │         [('Alice', IT, 1000), ('Carol', IT, 1200)]
+        │
+        │         Step 2: Sort by -Salary
+        │         [('Carol', IT, 1200), ('Alice', IT, 1000)]
+        │
+        ├── ETL_Pipelines_in_Spark:
+        │   ├── Extract:
+        │   │     df = spark.read.option("header", True).csv("raw/employees.csv")
+        │   │
+        │   ├── Sample Input: Raw CSV with null salaries & string salary types.
+        │   │     +--------+---+--------+
+        │   │     | Name   |Age| Salary |
+        │   │     +--------+---+--------+
+        │   │     | Alice  | 30|  1000  |
+        │   │     | Bob    | 28|  NULL  |
+        │   │     | Carol  | 35|  1200  |
+        │   │
+        │   ├── Transform:
+        │   │     df_clean = df.na.fill({"Salary": 0}) \
+        │   │                    .withColumn("Salary", df.Salary.cast("Integer")) \
+        │   │                    .filter(df.Age.isNotNull())
+        │   │
+        │   ├── Transform Stage:
+        │   │     Step 1: Fill Nulls
+        │   │     +--------+---+--------+
+        │   │     | Bob    | 28|   0    |
+        │   │
+        │   │     Step 2: Cast Salary to Integer
+        │   │
+        │   ├── Load:
+        │   │     df_clean.write.mode("overwrite").parquet("processed/employees_clean.parquet")
+        │   │
+        │   ├── Final DataFrame Output:
+        │   │     Cleaned data written to Parquet.
+        │   │
+        │   └── Notes:
+        │         - Use `.repartition()` to optimize large writes.
+        │         - Leverage `.cache()` before reusing transformed data.
+        │         - Validate schemas during Extract phase.
+        │
+        └── Key_Takeaways:
+            ├── Handle joins carefully when columns differ.
+            ├── Use multiple aggregations in a single `groupBy` for efficiency.
+            ├── Always control sorting direction explicitly (`asc()`, `desc()`).
+            ├── Clean nulls and cast data types early in ETL.
+            └── Combine DataFrame API + SQL for flexible pipeline designs.
