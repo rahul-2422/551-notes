@@ -1795,3 +1795,1267 @@ Foundations_And_Core_Concepts/
 │   │       - "Select products priced above the category average."
 │   │
 │   │
+│   ├── IN_EXISTS_ANY_ALL_Usage/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: Use subqueries to filter data based on dynamic sets or conditions.
+│   │
+│   │       ---
+│   │       📌 **1. `IN` — Set Membership Check**
+│   │       - Checks if a value exists **within a list** returned by a subquery.
+│   │       ```sql
+│   │       SELECT name
+│   │       FROM employees
+│   │       WHERE dept_id IN (
+│   │           SELECT dept_id FROM departments WHERE location = 'NY'
+│   │       );
+│   │       ```
+│   │       - Subquery returns multiple values.
+│   │
+│   │       ---
+│   │       📌 **2. `EXISTS` — Existence Check**
+│   │       - Returns TRUE if the subquery returns **any row**.
+│   │       ```sql
+│   │       SELECT name
+│   │       FROM employees e
+│   │       WHERE EXISTS (
+│   │           SELECT 1 FROM departments d WHERE d.dept_id = e.dept_id AND d.location = 'NY'
+│   │       );
+│   │       ```
+│   │       - Efficient for checking if related data **exists**.
+│   │
+│   │       ---
+│   │       📌 **3. `ANY` / `SOME` — Compare to **Any** Value in Subquery**
+│   │       ```sql
+│   │       SELECT name, salary
+│   │       FROM employees
+│   │       WHERE salary > ANY (
+│   │           SELECT salary FROM employees WHERE dept_id = 10
+│   │       );
+│   │       ```
+│   │       - TRUE if condition matches **at least one** value.
+│   │
+│   │       ---
+│   │       📌 **4. `ALL` — Compare to **All** Values in Subquery**
+│   │       ```sql
+│   │       SELECT name, salary
+│   │       FROM employees
+│   │       WHERE salary > ALL (
+│   │           SELECT salary FROM employees WHERE dept_id = 10
+│   │       );
+│   │       ```
+│   │       - TRUE if condition matches **every** value.
+│   │
+│   │       ---
+│   │       🚨 **Key Differences:**
+│   │       | Operator | Use Case               | Returns TRUE If...         |
+│   │       |----------|------------------------|----------------------------|
+│   │       | IN       | Value in list          | Value matches any in list  |
+│   │       | EXISTS   | Subquery returns rows  | At least one row exists    |
+│   │       | ANY      | Compare to any value   | Condition true for ≥1      |
+│   │       | ALL      | Compare to all values  | Condition true for all     |
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Use `EXISTS` for correlated subqueries where you don’t need data, just presence.
+│   │       - Use `IN` when the subquery returns a **small set**.
+│   │       - Avoid `IN` with large datasets — can be slower than joins.
+│   │
+│   │       ---
+│   │       ⚡ **Performance Tip:**
+│   │       - MySQL often optimizes `EXISTS` better than `IN` for correlated queries.
+│   │       - Use `NOT EXISTS` instead of `NOT IN` to handle NULL-safe logic.
+│   │
+│   │
+├── Set_Operations/
+│   ├── UNION_vs_UNION_ALL/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: Combine result sets from two or more `SELECT` queries.
+│   │       - Both `UNION` and `UNION ALL` stack datasets **vertically**.
+│   │
+│   │       ---
+│   │       📌 **Syntax**:
+│   │       ```sql
+│   │       SELECT column1, column2 FROM tableA
+│   │       UNION         -- or UNION ALL
+│   │       SELECT column1, column2 FROM tableB;
+│   │       ```
+│   │
+│   │       ---
+│   │       📊 **Key Differences**:
+│   │       | Feature        | UNION              | UNION ALL          |
+│   │       |----------------|--------------------|--------------------|
+│   │       | Duplicates     | Removed (DISTINCT) | Keeps all          |
+│   │       | Performance    | Slower             | Faster             |
+│   │       | Use Case       | When uniqueness is | When all data      |
+│   │       |                | required           | should be retained |
+│   │
+│   │       ---
+│   │       Example:
+│   │       ```sql
+│   │       SELECT city FROM customers
+│   │       UNION
+│   │       SELECT city FROM suppliers;
+│   │       ```
+│   │       - This returns a **distinct list** of cities.
+│   │
+│   │       ```sql
+│   │       SELECT city FROM customers
+│   │       UNION ALL
+│   │       SELECT city FROM suppliers;
+│   │       ```
+│   │       - This returns **all cities**, including duplicates.
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - Both queries must have:
+│   │         - Same number of columns.
+│   │         - Compatible data types.
+│   │       - `ORDER BY` applies to the **final result**, not individual queries:
+│   │       ```sql
+│   │       (SELECT ... FROM ...)
+│   │       UNION
+│   │       (SELECT ... FROM ...)
+│   │       ORDER BY column1;
+│   │       ```
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Use `UNION ALL` when you **don’t need deduplication** — it avoids unnecessary sorting.
+│   │       - If deduplication is critical, use `UNION`.
+│   │
+│   │       ---
+│   │       ⚡ **Performance Tip:**
+│   │       - `UNION` can be expensive due to the internal **sorting and deduplication**.
+│   │       - For large datasets, consider:
+│   │         ```sql
+│   │         SELECT DISTINCT column1 FROM (
+│   │             SELECT column1 FROM A
+│   │             UNION ALL
+│   │             SELECT column1 FROM B
+│   │         ) AS combined;
+│   │         ```
+│   │
+│   │
+│   ├── INTERSECT_Workaround/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: 
+│   │       - `INTERSECT` returns **only rows common** to both `SELECT` queries.
+│   │       - Standard SQL supports it, but ❌ **MySQL does not**.
+│   │
+│   │       ---
+│   │       📌 **Standard SQL Syntax (Not in MySQL)**:
+│   │       ```sql
+│   │       SELECT column1 FROM tableA
+│   │       INTERSECT
+│   │       SELECT column1 FROM tableB;
+│   │       ```
+│   │
+│   │       ---
+│   │       🚨 **MySQL Workaround**:
+│   │       Use an `INNER JOIN` or `IN` to simulate `INTERSECT`.
+│   │
+│   │       **1. INNER JOIN Approach**:
+│   │       ```sql
+│   │       SELECT DISTINCT a.column1
+│   │       FROM tableA a
+│   │       INNER JOIN tableB b ON a.column1 = b.column1;
+│   │       ```
+│   │
+│   │       **2. IN Clause Approach**:
+│   │       ```sql
+│   │       SELECT column1
+│   │       FROM tableA
+│   │       WHERE column1 IN (
+│   │           SELECT column1 FROM tableB
+│   │       );
+│   │       ```
+│   │
+│   │       ---
+│   │       📊 **Example**:
+│   │       Find customers who are also suppliers:
+│   │       ```sql
+│   │       SELECT DISTINCT customer_name
+│   │       FROM customers
+│   │       INNER JOIN suppliers
+│   │       ON customers.customer_name = suppliers.supplier_name;
+│   │       ```
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Prefer `INNER JOIN` for better performance over `IN` in large datasets.
+│   │       - Always use `DISTINCT` to mimic `INTERSECT` behavior.
+│   │
+│   │       ---
+│   │       ⚡ **Performance Tip:**
+│   │       - Ensure columns involved are **indexed** for faster joins.
+│   │       - Be cautious with subqueries inside `IN` — they can degrade performance if unoptimized.
+│   │
+│   │
+│   └── EXCEPT_Workaround/
+│       └── Explanation:
+│           🔹 **Purpose**: 
+│           - `EXCEPT` returns rows from the **first query** that do **not exist** in the second query.
+│           - Standard SQL supports it, but ❌ **MySQL does not**.
+│    
+│           ---
+│           📌 **Standard SQL Syntax (Not in MySQL)**:
+│           ```sql
+│           SELECT column1 FROM tableA
+│           EXCEPT
+│           SELECT column1 FROM tableB;
+│           ```
+│    
+│           ---
+│           🚨 **MySQL Workaround**:
+│           Use `LEFT JOIN` + `WHERE IS NULL` or `NOT IN` / `NOT EXISTS`.
+│    
+│           **1. LEFT JOIN Approach**:
+│           ```sql
+│           SELECT DISTINCT a.column1
+│           FROM tableA a
+│           LEFT JOIN tableB b ON a.column1 = b.column1
+│           WHERE b.column1 IS NULL;
+│           ```
+│           - This retrieves rows in `tableA` **not present** in `tableB`.
+│    
+│           **2. NOT IN Approach**:
+│           ```sql
+│           SELECT column1
+│           FROM tableA
+│           WHERE column1 NOT IN (
+│               SELECT column1 FROM tableB
+│           );
+│           ```
+│    
+│           **3. NOT EXISTS Approach**:
+│           ```sql
+│           SELECT column1
+│           FROM tableA a
+│           WHERE NOT EXISTS (
+│               SELECT 1 FROM tableB b WHERE b.column1 = a.column1
+│           );
+│           ```
+│    
+│           ---
+│           📊 **Example**:
+│           Find customers who are **not** suppliers:
+│           ```sql
+│           SELECT DISTINCT customer_name
+│           FROM customers c
+│           LEFT JOIN suppliers s
+│           ON c.customer_name = s.supplier_name
+│           WHERE s.supplier_name IS NULL;
+│           ```
+│    
+│           ---
+│           ✅ **Best Practices:**
+│           - Use `LEFT JOIN ... IS NULL` for clarity and better handling of NULL-safe logic.
+│           - Avoid `NOT IN` if the subquery can return NULLs — it may lead to unexpected results.
+│    
+│           ---
+│           ⚡ **Performance Tip:**
+│           - `NOT EXISTS` is generally faster and safer than `NOT IN` on large datasets.
+│           - Always index the columns used in join or subquery filters.
+│    
+│    
+├── Aggregate_Functions/
+│   ├── COUNT_SUM_AVG_MIN_MAX/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: 
+│   │       - Aggregate functions perform **calculations over sets of rows** and return a single value.
+│   │       - Commonly used with `GROUP BY` for summaries.
+│   │
+│   │       ---
+│   │       📌 **1. `COUNT()` — Count Rows**
+│   │       ```sql
+│   │       SELECT COUNT(*) FROM employees;
+│   │       SELECT COUNT(salary) FROM employees;
+│   │       ```
+│   │       - `COUNT(*)` counts **all rows**.
+│   │       - `COUNT(column)` counts **non-NULL** values only.
+│   │
+│   │       ---
+│   │       📌 **2. `SUM()` — Total of Values**
+│   │       ```sql
+│   │       SELECT SUM(salary) FROM employees;
+│   │       ```
+│   │       - Adds up numeric values.
+│   │
+│   │       ---
+│   │       📌 **3. `AVG()` — Average Value**
+│   │       ```sql
+│   │       SELECT AVG(salary) FROM employees;
+│   │       ```
+│   │
+│   │       ---
+│   │       📌 **4. `MIN()` and `MAX()` — Lowest & Highest**
+│   │       ```sql
+│   │       SELECT MIN(salary), MAX(salary) FROM employees;
+│   │       ```
+│   │
+│   │       ---
+│   │       📊 **Example with GROUP BY**:
+│   │       ```sql
+│   │       SELECT department, COUNT(*) AS emp_count, AVG(salary) AS avg_salary
+│   │       FROM employees
+│   │       GROUP BY department;
+│   │       ```
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - Aggregate functions **ignore NULLs** (except `COUNT(*)`).
+│   │       - You **cannot** reference non-aggregated columns without `GROUP BY`.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Alias results (`AS`) for clarity.
+│   │       - Use `HAVING` to filter on aggregated values.
+│   │       ```sql
+│   │       HAVING COUNT(*) > 5
+│   │       ```
+│   │
+│   │       ---
+│   │       ⚡ **Performance Tip:**
+│   │       - Use covering indexes for grouped columns to optimize aggregation.
+│   │       - Avoid unnecessary `GROUP BY` on high-cardinality columns.
+│   │
+│   │
+│   └── GROUP_BY_Behavior/
+│       └── Explanation:
+│           🔹 **Purpose**: 
+│           - The `GROUP BY` clause groups rows that have the same values into **summary rows**.
+│           - Typically paired with aggregate functions (`COUNT()`, `SUM()`, etc.).
+│    
+│           ---
+│           📌 **Basic Syntax**:
+│           ```sql
+│           SELECT column1, AGG_FUNC(column2)
+│           FROM table_name
+│           GROUP BY column1;
+│           ```
+│    
+│           Example:
+│           ```sql
+│           SELECT department, COUNT(*) AS emp_count
+│           FROM employees
+│           GROUP BY department;
+│           ```
+│    
+│           ---
+│           📊 **Visualization**:
+│           Before GROUP BY:
+│           +----------+--------+
+│           | Dept     | Salary |
+│           +----------+--------+
+│           | HR       | 50000  |
+│           | IT       | 60000  |
+│           | HR       | 55000  |
+│    
+│           After GROUP BY Dept:
+│           +----------+-----------+
+│           | Dept     | emp_count |
+│           +----------+-----------+
+│           | HR       |     2     |
+│           | IT       |     1     |
+│    
+│           ---
+│           🚨 **Important Rules:**
+│           - Every column in `SELECT` must be:
+│             - In the `GROUP BY`, or
+│             - Wrapped in an aggregate function.
+│    
+│           - MySQL (with default settings) allows non-standard behavior (e.g., selecting columns not in `GROUP BY`), but this is unsafe and non-portable.
+│    
+│           ---
+│           ✅ **Best Practices:**
+│           - Stick to strict SQL standards: only group or aggregate.
+│           - Use `HAVING` to filter **after grouping**:
+│             ```sql
+│             HAVING COUNT(*) > 3
+│             ```
+│    
+│           ---
+│           ⚡ **Performance Tips:**
+│           - Index columns used in `GROUP BY` for faster grouping.
+│           - Avoid grouping on columns with many unique values unless necessary (high-cardinality columns).
+│    
+│           ---
+│           🔹 **Advanced Example**:
+│           ```sql
+│           SELECT dept_id, AVG(salary)
+│           FROM employees
+│           GROUP BY dept_id
+│           HAVING AVG(salary) > 50000;
+│           ```
+├── Modifying_Data/
+│   ├── INSERT_Single_and_Bulk/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: 
+│   │       - The `INSERT` statement adds **new rows** to a table.
+│   │       - Supports both **single row** and **bulk inserts**.
+│   │
+│   │       ---
+│   │       📌 **1. Single Row Insert**:
+│   │       ```sql
+│   │       INSERT INTO employees (emp_id, name, department, salary)
+│   │       VALUES (1, 'Alice', 'HR', 60000);
+│   │       ```
+│   │
+│   │       - Specify columns explicitly for clarity and safety.
+│   │
+│   │       ---
+│   │       📌 **2. Bulk Insert**:
+│   │       ```sql
+│   │       INSERT INTO employees (emp_id, name, department, salary)
+│   │       VALUES 
+│   │           (2, 'Bob', 'IT', 55000),
+│   │           (3, 'Carol', 'Finance', 70000);
+│   │       ```
+│   │       - More efficient than multiple single inserts.
+│   │
+│   │       ---
+│   │       📌 **3. Insert from SELECT**:
+│   │       ```sql
+│   │       INSERT INTO archived_employees (emp_id, name, department)
+│   │       SELECT emp_id, name, department
+│   │       FROM employees
+│   │       WHERE status = 'inactive';
+│   │       ```
+│   │       - Copies data between tables.
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - If you omit column names, values must match **all columns in order** — avoid this practice.
+│   │       - Respect constraints: `NOT NULL`, `UNIQUE`, `FOREIGN KEY`.
+│   │       - Use `DEFAULT` keyword to insert default values.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Always list column names in `INSERT`.
+│   │       - Use bulk inserts when adding multiple rows to reduce transaction overhead.
+│   │       - Validate data types before insertion to avoid runtime errors.
+│   │
+│   │       ---
+│   │       ⚡ **Performance Tips:**
+│   │       - For massive inserts:
+│   │         - Disable indexes temporarily (if possible) and rebuild after.
+│   │         - Use transactions to batch commits:
+│   │         ```sql
+│   │         START TRANSACTION;
+│   │         -- multiple INSERTs
+│   │         COMMIT;
+│   │         ```
+│   │       - Use `LOAD DATA INFILE` for high-performance bulk loading.
+│   │
+│   │
+│   ├── UPDATE_with_JOIN/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: 
+│   │       - The `UPDATE` statement modifies existing rows in a table.
+│   │       - You can update based on conditions — and with JOINs, you can update using data from other tables.
+│   │
+│   │       ---
+│   │       📌 **Basic UPDATE Syntax**:
+│   │       ```sql
+│   │       UPDATE employees
+│   │       SET salary = salary * 1.1
+│   │       WHERE department = 'HR';
+│   │       ```
+│   │       - Increases salary by 10% for HR employees.
+│   │
+│   │       ---
+│   │       📌 **UPDATE with JOIN Syntax** (MySQL Style):
+│   │       ```sql
+│   │       UPDATE employees e
+│   │       JOIN departments d ON e.dept_id = d.dept_id
+│   │       SET e.bonus = 1000
+│   │       WHERE d.dept_name = 'Finance';
+│   │       ```
+│   │       - This assigns bonuses to employees in Finance by referencing the `departments` table.
+│   │
+│   │       ---
+│   │       📊 **Visualization**:
+│   │       - Join is performed first to identify target rows.
+│   │       - Then, the `SET` clause applies updates.
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - Without a `WHERE` clause, **all rows** will be updated!
+│   │       ```sql
+│   │       UPDATE table SET column = value;  -- Dangerous if unfiltered
+│   │       ```
+│   │
+│   │       - MySQL requires explicit JOIN syntax; you can't use subqueries in the `SET` clause like some other RDBMS.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Always **backup** before mass updates.
+│   │       - Use `WHERE` carefully to limit scope.
+│   │       - Test your `JOIN` first using a `SELECT` before applying `UPDATE`.
+│   │
+│   │       Example:
+│   │       ```sql
+│   │       SELECT e.*
+│   │       FROM employees e
+│   │       JOIN departments d ON e.dept_id = d.dept_id
+│   │       WHERE d.dept_name = 'Finance';
+│   │       ```
+│   │
+│   │       ---
+│   │       ⚡ **Performance Tip:**
+│   │       - For large updates, batch them if possible.
+│   │       - Ensure join keys are indexed.
+│   │       - Use transactions to control rollback if needed:
+│   │       ```sql
+│   │       START TRANSACTION;
+│   │       UPDATE ...;
+│   │       COMMIT;
+│   │       ```
+│   │
+│   │
+│   └── DELETE_with_Conditions/
+│       └── Explanation:
+│           🔹 **Purpose**: 
+│           - The `DELETE` statement removes rows from a table based on specified conditions.
+│           - Without conditions, it will delete **all rows** — so caution is critical!
+│    
+│           ---
+│           📌 **Basic DELETE Syntax**:
+│           ```sql
+│           DELETE FROM employees
+│           WHERE department = 'HR';
+│           ```
+│           - Deletes all employees in the HR department.
+│    
+│           ---
+│           📌 **DELETE with JOIN** (MySQL Specific):
+│           ```sql
+│           DELETE e
+│           FROM employees e
+│           JOIN departments d ON e.dept_id = d.dept_id
+│           WHERE d.dept_name = 'Finance';
+│           ```
+│           - Deletes employees belonging to the Finance department.
+│    
+│           ---
+│           🚨 **Critical Notes:**
+│           - **Never run**:
+│             ```sql
+│             DELETE FROM table_name;
+│             ```
+│             Unless you intend to wipe all data.
+│    
+│           - Use `LIMIT` for controlled deletions:
+│             ```sql
+│             DELETE FROM logs
+│             ORDER BY created_at ASC
+│             LIMIT 1000;
+│             ```
+│    
+│           ---
+│           ✅ **Best Practices:**
+│           - Always run a `SELECT` version of your `DELETE` query first to preview affected rows.
+│           - For large deletes, consider **batch deletes** to avoid locking issues.
+│           - Use foreign key constraints with `ON DELETE CASCADE` carefully to handle related data.
+│    
+│           ---
+│           ⚡ **Performance Tip:**
+│           - Large deletions can cause table bloat; consider `TRUNCATE` for full-table wipes (faster, but irreversible).
+│           - Example:
+│             ```sql
+│             TRUNCATE TABLE temp_data;
+│             ```
+│           - Note: `TRUNCATE` doesn’t activate triggers and resets AUTO_INCREMENT.
+│    
+│    
+├── Advanced_Clauses/
+│   ├── CASE_WHEN/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: 
+│   │       - `CASE WHEN` allows **if-else logic** within SQL queries.
+│   │       - It returns values based on conditions evaluated per row.
+│   │
+│   │       ---
+│   │       📌 **Syntax**:
+│   │       ```sql
+│   │       SELECT name,
+│   │              CASE 
+│   │                  WHEN salary > 70000 THEN 'High'
+│   │                  WHEN salary BETWEEN 50000 AND 70000 THEN 'Medium'
+│   │                  ELSE 'Low'
+│   │              END AS salary_band
+│   │       FROM employees;
+│   │       ```
+│   │
+│   │       ---
+│   │       📊 **Example Output**:
+│   │       +--------+-------------+
+│   │       | name   | salary_band |
+│   │       +--------+-------------+
+│   │       | Alice  | Medium      |
+│   │       | Bob    | High        |
+│   │       +--------+-------------+
+│   │
+│   │       ---
+│   │       🔹 **Forms of CASE**:
+│   │       1️⃣ **Searched CASE** (most common):
+│   │       ```sql
+│   │       CASE WHEN condition THEN result ...
+│   │       ```
+│   │
+│   │       2️⃣ **Simple CASE** (compares a single expression):
+│   │       ```sql
+│   │       CASE dept_id
+│   │           WHEN 1 THEN 'HR'
+│   │           WHEN 2 THEN 'IT'
+│   │           ELSE 'Other'
+│   │       END
+│   │       ```
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - The `ELSE` clause is optional but recommended for completeness.
+│   │       - The first matching `WHEN` is executed — remaining conditions are skipped.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Use `CASE` for dynamic categorization, conditional calculations, or pivot-like queries.
+│   │       - Keep conditions clear and avoid overly complex nesting.
+│   │
+│   │       ---
+│   │       ⚡ **Use Cases:**
+│   │       - Custom sorting:
+│   │         ```sql
+│   │         ORDER BY 
+│   │           CASE WHEN status = 'urgent' THEN 1
+│   │                WHEN status = 'normal' THEN 2
+│   │                ELSE 3
+│   │           END
+│   │         ```
+│   │       - Conditional aggregation:
+│   │         ```sql
+│   │         SUM(CASE WHEN gender = 'M' THEN 1 ELSE 0 END) AS male_count
+│   │         ```
+│   │
+│   │
+│   ├── IFNULL_and_COALESCE/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: 
+│   │       - Replace `NULL` values with specified defaults during query execution.
+│   │       - Ensures cleaner outputs and avoids unexpected `NULL` propagation in results.
+│   │
+│   │       ---
+│   │       📌 **1. `IFNULL()` — MySQL-Specific**
+│   │       ```sql
+│   │       SELECT name, IFNULL(bonus, 0) AS bonus_amount
+│   │       FROM employees;
+│   │       ```
+│   │       - If `bonus` is `NULL`, returns `0`.
+│   │       - Syntax: `IFNULL(expression, replacement)`
+│   │
+│   │       ---
+│   │       📌 **2. `COALESCE()` — ANSI Standard**
+│   │       ```sql
+│   │       SELECT name, COALESCE(bonus, commission, 0) AS total_bonus
+│   │       FROM employees;
+│   │       ```
+│   │       - Returns the **first non-NULL** value from the list.
+│   │       - More flexible than `IFNULL()` because it accepts multiple arguments.
+│   │
+│   │       ---
+│   │       🚨 **Key Differences**:
+│   │       | Feature      | IFNULL()     | COALESCE()  |
+│   │       |--------------|--------------|-------------|
+│   │       | Portability  | MySQL only   | ANSI SQL    |
+│   │       | Args         | 2 arguments  | 2+ arguments|
+│   │
+│   │       ---
+│   │       📊 **Example Scenario**:
+│   │       Handling optional contact info:
+│   │       ```sql
+│   │       SELECT name, COALESCE(phone, email, 'No Contact') AS contact_info
+│   │       FROM customers;
+│   │       ```
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Use `COALESCE()` for cross-database compatibility.
+│   │       - Always define a meaningful default value when substituting `NULL`.
+│   │       - Be cautious with data types — ensure replacements match expected output types.
+│   │
+│   │       ---
+│   │       ⚡ **Performance Tip:**
+│   │       - Both functions are lightweight but avoid wrapping unnecessary columns.
+│   │       - Use in reporting queries to prevent `NULL` from cluttering outputs.
+│   │
+│   │
+│   ├── WINDOW_Functions_OVER_PARTITION_BY/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: 
+│   │       - **Window functions** perform calculations **across sets of rows** related to the current row.
+│   │       - Unlike `GROUP BY`, they **retain individual rows** while providing aggregates or rankings.
+│   │
+│   │       ---
+│   │       📌 **Core Syntax**:
+│   │       ```sql
+│   │       SELECT name, department, salary,
+│   │              AVG(salary) OVER (PARTITION BY department) AS dept_avg_salary
+│   │       FROM employees;
+│   │       ```
+│   │       - `OVER()` defines the "window" of rows to operate on.
+│   │       - `PARTITION BY` divides data into groups (like GROUP BY, but non-destructive).
+│   │
+│   │       ---
+│   │       📊 **Example Output**:
+│   │       +--------+------------+--------+-----------------+
+│   │       | name   | department | salary | dept_avg_salary |
+│   │       +--------+------------+--------+-----------------+
+│   │       | Alice  | HR         | 60000  |     55000       |
+│   │       | Bob    | HR         | 50000  |     55000       |
+│   │       | Carol  | IT         | 70000  |     70000       |
+│   │
+│   │       ---
+│   │       📌 **Common Window Functions**:
+│   │       - `ROW_NUMBER() OVER (...)`   → Unique row numbering.
+│   │       - `RANK() OVER (...)`         → Ranking with gaps.
+│   │       - `DENSE_RANK() OVER (...)`   → Ranking without gaps.
+│   │       - `SUM()`, `AVG()`, `COUNT()` as windowed aggregates.
+│   │
+│   │       ---
+│   │       🔹 **ORDER BY in Windows**:
+│   │       - You can define order within partitions:
+│   │       ```sql
+│   │       ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC)
+│   │       ```
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - Requires MySQL **8.0+**.
+│   │       - Window functions **cannot** be used in `WHERE` — use them in `SELECT` or `ORDER BY`.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Use for running totals, rankings, percentiles without losing row-level detail.
+│   │       - Prefer `ROW_NUMBER()` for pagination solutions over OFFSET in some cases.
+│   │
+│   │       ---
+│   │       ⚡ **Performance Tip:**
+│   │       - Proper indexing helps, but window functions often require sorting — be mindful on large datasets.
+│   │       - Use partitions smartly to limit computation scope.
+│   │
+│   │
+│   └── CTE_WITH_Clause/
+│       └── Explanation:
+│           🔹 **Purpose**: 
+│           - A **Common Table Expression (CTE)** allows you to define a temporary result set using `WITH`.
+│           - Makes complex queries easier to read and maintain.
+│           - Think of it as a named subquery that you can reference within your main query.
+│    
+│           ---
+│           📌 **Basic Syntax**:
+│           ```sql
+│           WITH dept_avg AS (
+│               SELECT department, AVG(salary) AS avg_salary
+│               FROM employees
+│               GROUP BY department
+│           )
+│           SELECT e.name, e.salary, d.avg_salary
+│           FROM employees e
+│           JOIN dept_avg d ON e.department = d.department;
+│           ```
+│    
+│           ---
+│           🔹 **Key Features**:
+│           - Improves readability over nested subqueries.
+│           - Can be **recursive** for hierarchical data (e.g., org charts, tree structures).
+│    
+│           ---
+│           📌 **Recursive CTE Example**:
+│           ```sql
+│           WITH RECURSIVE hierarchy AS (
+│               SELECT emp_id, name, manager_id
+│               FROM employees
+│               WHERE manager_id IS NULL
+│    
+│               UNION ALL
+│    
+│               SELECT e.emp_id, e.name, e.manager_id
+│               FROM employees e
+│               JOIN hierarchy h ON e.manager_id = h.emp_id
+│           )
+│           SELECT * FROM hierarchy;
+│           ```
+│    
+│           ---
+│           🚨 **Important Notes:**
+│           - CTEs exist **only during execution** — they are not stored.
+│           - Each CTE name must be unique within the query.
+│           - MySQL supports CTEs from version **8.0+**.
+│    
+│           ---
+│           ✅ **Best Practices:**
+│           - Use CTEs to break down multi-step queries logically.
+│           - Prefer CTEs over deeply nested subqueries for better maintainability.
+│           - For repeated subqueries, CTEs can enhance performance by avoiding duplication.
+│    
+│           ---
+│           ⚡ **Performance Tip:**
+│           - CTEs are **inline views**; they don’t automatically optimize like materialized views.
+│           - For large datasets, check if subqueries or temporary tables perform better.
+│    
+│    
+Given_a_Question/
+├── How_to_Interpret_Requirements/
+│   └── Explanation:
+│       🔹 **Step 1: Understand What’s Being Asked**
+│       - Is it asking for:
+│         - A **list**? (likely a `SELECT`)
+│         - A **calculation**? (aggregates, window functions)
+│         - A **filter**? (WHERE, HAVING)
+│         - A **transformation**? (CASE, JOINs)
+│
+│       - **Clarify ambiguous terms**:
+│         - "Top customers" → By what metric? Revenue? Number of orders?
+│         - "Active users" → Define "active" (last 30 days? status flag?)
+│
+│       ---
+│       🔹 **Step 2: Identify Key Elements**
+│       - **Tables involved**.
+│       - **Relationships** (Do you need JOINs?).
+│       - **Filters** (`WHERE`, `HAVING`?).
+│       - **Ordering or Limits** (`ORDER BY`, `LIMIT`?).
+│       - **Aggregations** (`GROUP BY`?).
+│
+│       ---
+│       🔹 **Example Problem Breakdown**:
+│       **Q:** "Find departments with more than 5 employees earning above 60K."
+│
+│       1️⃣ Tables: `employees`
+│       2️⃣ Filter: `salary > 60000`
+│       3️⃣ Grouping: By `department`
+│       4️⃣ Condition on group: `HAVING COUNT(*) > 5`
+│
+│       Final Query:
+│       ```sql
+│       SELECT department, COUNT(*) AS emp_count
+│       FROM employees
+│       WHERE salary > 60000
+│       GROUP BY department
+│       HAVING emp_count > 5;
+│       ```
+│
+│       ---
+│       ✅ **Best Practices:**
+│       - **Sketch** intermediate steps on paper before writing SQL.
+│       - Think in terms of **data flow** — how is data reduced or transformed at each stage?
+│       - Always ask: "Can this be solved differently for better performance or clarity?"
+│   
+│   
+├── Identify_Multiple_Approaches/
+│   └── Explanation:
+│       🔹 **Purpose**: 
+│       - For any SQL problem, there’s often **more than one way** to solve it.
+│       - The best solution depends on:
+│         - **Performance**
+│         - **Readability**
+│         - **Maintainability**
+│         - Dataset size & indexes
+│
+│       ---
+│       📌 **1. JOINs vs Subqueries**
+│       **Problem:** Get names of employees working in 'HR'.
+│
+│       🔸 **Using JOIN**:
+│       ```sql
+│       SELECT e.name
+│       FROM employees e
+│       JOIN departments d ON e.dept_id = d.dept_id
+│       WHERE d.dept_name = 'HR';
+│       ```
+│
+│       🔸 **Using Subquery**:
+│       ```sql
+│       SELECT name
+│       FROM employees
+│       WHERE dept_id = (
+│           SELECT dept_id FROM departments WHERE dept_name = 'HR'
+│       );
+│       ```
+│
+│       ✅ **When to Use**:
+│       - **JOINs**: Better for multi-row matches, more readable for complex relationships.
+│       - **Subqueries**: Simpler for single-value lookups (scalar) or filtering with `IN`.
+│
+│       ---
+│       📌 **2. CASE vs IF**
+│       - MySQL supports both, but:
+│         - `CASE` = ANSI standard, more powerful, supports complex conditions.
+│         - `IF` = MySQL-specific, simpler binary choice.
+│
+│       Example:
+│       ```sql
+│       SELECT name,
+│              CASE WHEN salary > 60000 THEN 'High' ELSE 'Normal' END AS category
+│       FROM employees;
+│       ```
+│       vs
+│       ```sql
+│       SELECT name, IF(salary > 60000, 'High', 'Normal') AS category
+│       FROM employees;
+│       ```
+│
+│       ✅ **Best Practice**: Prefer `CASE` for portability and complex logic.
+│
+│       ---
+│       📌 **3. CTE vs Nested Queries**
+│       **Problem:** Get departments where avg salary > 50K.
+│
+│       🔸 **Using Nested Query**:
+│       ```sql
+│       SELECT department, avg_salary
+│       FROM (
+│           SELECT department, AVG(salary) AS avg_salary
+│           FROM employees
+│           GROUP BY department
+│       ) AS dept_avg
+│       WHERE avg_salary > 50000;
+│       ```
+│
+│       🔸 **Using CTE**:
+│       ```sql
+│       WITH dept_avg AS (
+│           SELECT department, AVG(salary) AS avg_salary
+│           FROM employees
+│           GROUP BY department
+│       )
+│       SELECT department, avg_salary
+│       FROM dept_avg
+│       WHERE avg_salary > 50000;
+│       ```
+│
+│       ✅ **When to Use**:
+│       - **CTEs** improve readability, especially with multi-step logic.
+│       - Nested queries can be faster in simple cases but harder to maintain.
+│
+│       ---
+│       ⚡ **Golden Rule**:
+│       - Always think: "What’s clearer for future developers AND what scales better?"
+│       - Test alternatives on large datasets to compare execution plans.
+│   
+│   
+├── Common_Question_Types/
+│   ├── Top_N_Queries/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: 
+│   │       - Retrieve the **top N records** based on a specific ordering (e.g., highest salaries, latest dates).
+│   │
+│   │       ---
+│   │       📌 **Basic Syntax (MySQL)**:
+│   │       ```sql
+│   │       SELECT name, salary
+│   │       FROM employees
+│   │       ORDER BY salary DESC
+│   │       LIMIT 5;
+│   │       ```
+│   │       - This returns the **top 5 highest-paid employees**.
+│   │
+│   │       ---
+│   │       📌 **Top-N Per Group (Advanced Pattern)**:
+│   │       - Find top 2 salaries **per department**.
+│   │
+│   │       Using **Window Functions** (MySQL 8.0+):
+│   │       ```sql
+│   │       SELECT name, department, salary
+│   │       FROM (
+│   │           SELECT name, department, salary,
+│   │                  ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS rank
+│   │           FROM employees
+│   │       ) ranked
+│   │       WHERE rank <= 2;
+│   │       ```
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - Always pair `LIMIT` with `ORDER BY` for deterministic results.
+│   │       - Without `ORDER BY`, `LIMIT` returns arbitrary rows.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Use indexes aligned with `ORDER BY` columns to speed up Top-N queries.
+│   │       - For pagination, combine `ORDER BY` + `LIMIT` + `OFFSET`.
+│   │
+│   │       ---
+│   │       ⚡ **Alternative Approach (If No Window Functions)**:
+│   │       - In older MySQL versions, simulate Top-N per group using correlated subqueries:
+│   │       ```sql
+│   │       SELECT e1.*
+│   │       FROM employees e1
+│   │       WHERE 2 > (
+│   │           SELECT COUNT(*)
+│   │           FROM employees e2
+│   │           WHERE e2.department = e1.department
+│   │             AND e2.salary > e1.salary
+│   │       );
+│   │       ```
+│   │       - This is less efficient but works where window functions aren’t available.
+│   │
+│   │
+Given_a_Question/
+├── Common_Question_Types/
+│   ├── Finding_Duplicates/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: 
+│   │       - Identify rows where certain columns have **duplicate values**.
+│   │       - Useful for detecting data integrity issues or enforcing uniqueness manually.
+│
+│   │       ---
+│   │       📌 **Basic Pattern**:
+│   │       - Use `GROUP BY` + `HAVING COUNT(*) > 1`.
+│   │
+│   │       Example: Find duplicate email addresses in a `users` table.
+│   │       ```sql
+│   │       SELECT email, COUNT(*) AS occurrences
+│   │       FROM users
+│   │       GROUP BY email
+│   │       HAVING COUNT(*) > 1;
+│   │       ```
+│   │
+│   │       ---
+│   │       📊 **Visualization**:
+│   │       users table:
+│   │       +----+-------------+
+│   │       | id | email       |
+│   │       +----+-------------+
+│   │       | 1  | a@test.com  |
+│   │       | 2  | b@test.com  |
+│   │       | 3  | a@test.com  |
+│   │
+│   │       Result:
+│   │       +-------------+-------------+
+│   │       | email       | occurrences |
+│   │       +-------------+-------------+
+│   │       | a@test.com  |      2      |
+│   │
+│   │       ---
+│   │       📌 **To Retrieve Full Duplicate Rows**:
+│   │       ```sql
+│   │       SELECT u.*
+│   │       FROM users u
+│   │       JOIN (
+│   │           SELECT email
+│   │           FROM users
+│   │           GROUP BY email
+│   │           HAVING COUNT(*) > 1
+│   │       ) dup ON u.email = dup.email;
+│   │       ```
+│
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - Duplicates depend on **which columns** you're checking — define the criteria clearly.
+│   │       - NULLs are treated as valid groupable values in MySQL.
+│
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Regularly audit tables where uniqueness is critical.
+│   │       - Enforce `UNIQUE` constraints where possible to prevent duplicates.
+│
+│   │       ---
+│   │       ⚡ **Cleanup Tip**:
+│   │       - After identifying duplicates, you can delete them while keeping one:
+│   │       ```sql
+│   │       DELETE u1 FROM users u1
+│   │       INNER JOIN users u2 
+│   │       ON u1.email = u2.email AND u1.id > u2.id;
+│   │       ```
+│   │       - This keeps the lowest `id` record.
+│   ├── Finding_Duplicates/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: 
+│   │       - Identify rows where certain columns have **duplicate values**.
+│   │       - Useful for detecting data integrity issues or enforcing uniqueness manually.
+│   │
+│   │       ---
+│   │       📌 **Basic Pattern**:
+│   │       - Use `GROUP BY` + `HAVING COUNT(*) > 1`.
+│   │
+│   │       Example: Find duplicate email addresses in a `users` table.
+│   │       ```sql
+│   │       SELECT email, COUNT(*) AS occurrences
+│   │       FROM users
+│   │       GROUP BY email
+│   │       HAVING COUNT(*) > 1;
+│   │       ```
+│   │
+│   │       ---
+│   │       📊 **Visualization**:
+│   │       users table:
+│   │       +----+-------------+
+│   │       | id | email       |
+│   │       +----+-------------+
+│   │       | 1  | a@test.com  |
+│   │       | 2  | b@test.com  |
+│   │       | 3  | a@test.com  |
+│   │
+│   │       Result:
+│   │       +-------------+-------------+
+│   │       | email       | occurrences |
+│   │       +-------------+-------------+
+│   │       | a@test.com  |      2      |
+│   │
+│   │       ---
+│   │       📌 **To Retrieve Full Duplicate Rows**:
+│   │       ```sql
+│   │       SELECT u.*
+│   │       FROM users u
+│   │       JOIN (
+│   │           SELECT email
+│   │           FROM users
+│   │           GROUP BY email
+│   │           HAVING COUNT(*) > 1
+│   │       ) dup ON u.email = dup.email;
+│   │       ```
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - Duplicates depend on **which columns** you're checking — define the criteria clearly.
+│   │       - NULLs are treated as valid groupable values in MySQL.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - Regularly audit tables where uniqueness is critical.
+│   │       - Enforce `UNIQUE` constraints where possible to prevent duplicates.
+│   │
+│   │       ---
+│   │       ⚡ **Cleanup Tip**:
+│   │       - After identifying duplicates, you can delete them while keeping one:
+│   │       ```sql
+│   │       DELETE u1 FROM users u1
+│   │       INNER JOIN users u2 
+│   │       ON u1.email = u2.email AND u1.id > u2.id;
+│   │       ```
+│   │       - This keeps the lowest `id` record.
+│   │
+│   │
+│   ├── Percentage_Calculations/
+│   │   └── Explanation:
+│   │       🔹 **Purpose**: 
+│   │       - Calculate percentages such as:
+│   │         - **Contribution to total**.
+│   │         - **Category distributions**.
+│   │         - Percent rankings.
+│   │
+│   │       ---
+│   │       📌 **1. Contribution to Total**:
+│   │       Example: What percentage of total sales does each customer contribute?
+│   │
+│   │       ```sql
+│   │       SELECT customer_id, 
+│   │              SUM(amount) AS customer_total,
+│   │              ROUND(SUM(amount) / total_sales.total * 100, 2) AS percentage
+│   │       FROM orders, 
+│   │            (SELECT SUM(amount) AS total FROM orders) AS total_sales
+│   │       GROUP BY customer_id;
+│   │       ```
+│   │
+│   │       ---
+│   │       📌 **2. Using Window Functions (MySQL 8.0+):**
+│   │       ```sql
+│   │       SELECT customer_id, amount,
+│   │              ROUND(amount / SUM(amount) OVER () * 100, 2) AS pct_of_total
+│   │       FROM orders;
+│   │       ```
+│   │       - This calculates each row's percentage of the **overall total**.
+│   │
+│   │       ---
+│   │       📌 **3. Percent Rank Example**:
+│   │       ```sql
+│   │       SELECT name, salary,
+│   │              PERCENT_RANK() OVER (ORDER BY salary DESC) AS salary_rank_pct
+│   │       FROM employees;
+│   │       ```
+│   │       - Shows where each employee stands in salary distribution.
+│   │
+│   │       ---
+│   │       🚨 **Important Notes:**
+│   │       - Always multiply by `100` to convert fractions to percentages.
+│   │       - Use `ROUND()` to control decimal precision in outputs.
+│   │       - Be cautious of **division by zero** when calculating percentages.
+│   │
+│   │       ---
+│   │       ✅ **Best Practices:**
+│   │       - For readability, alias percentage columns clearly (`pct_of_total`, `percent_share`).
+│   │       - Use window functions for cleaner syntax when supported.
+│   │
+│   │       ---
+│   │       ⚡ **Performance Tip:**
+│   │       - Pre-calculate grand totals if reused across many queries.
+│   │       - Avoid repeating subqueries for totals—use CTEs or JOIN once where possible.
+│   │
+│   │
+│   └── Date_Based_Queries/
+│       └── Explanation:
+│           🔹 **Purpose**: 
+│           - Work with dates for filtering, calculating intervals, grouping by periods, etc.
+│           - Essential for time-based reporting (e.g., "last 7 days", "monthly sales").
+│    
+│           ---
+│           📌 **1. Filtering by Date Range**:
+│           ```sql
+│           SELECT * 
+│           FROM orders
+│           WHERE order_date BETWEEN '2024-04-01' AND '2024-04-30';
+│           ```
+│           - Use `BETWEEN` for inclusive date ranges.
+│    
+│           ---
+│           📌 **2. Dynamic Date Filters**:
+│           - Last 7 days:
+│           ```sql
+│           WHERE order_date >= CURDATE() - INTERVAL 7 DAY
+│           ```
+│    
+│           - Current Month:
+│           ```sql
+│           WHERE MONTH(order_date) = MONTH(CURDATE())
+│             AND YEAR(order_date) = YEAR(CURDATE())
+│           ```
+│    
+│           ---
+│           📌 **3. Calculating Date Differences**:
+│           ```sql
+│           SELECT DATEDIFF(delivery_date, order_date) AS days_to_deliver
+│           FROM orders;
+│           ```
+│           - Returns difference in days.
+│    
+│           ---
+│           📌 **4. Grouping by Month or Year**:
+│           ```sql
+│           SELECT YEAR(order_date) AS year, MONTH(order_date) AS month, COUNT(*) AS orders_count
+│           FROM orders
+│           GROUP BY YEAR(order_date), MONTH(order_date)
+│           ORDER BY year, month;
+│           ```
+│    
+│           ---
+│           🚨 **Important Notes:**
+│           - Avoid wrapping columns in functions in `WHERE` clauses if possible (it prevents index usage):
+│             ```sql
+│             WHERE DATE(order_date) = '2024-04-27'   -- ❌
+│             ```
+│             Better:
+│             ```sql
+│             WHERE order_date >= '2024-04-27' AND order_date < '2024-04-28'  -- ✅
+│             ```
+│    
+│           - Be mindful of **time portions** in `DATETIME` fields.
+│    
+│           ---
+│           ✅ **Best Practices:**
+│           - Store dates in `DATE` or `DATETIME` formats — never as strings.
+│           - Use `CURDATE()`, `NOW()`, `LAST_DAY()`, etc., for dynamic queries.
+│    
+│           ---
+│           ⚡ **Performance Tip:**
+│           - Index date columns when frequently filtering by ranges.
+│           - For partitioned tables, consider partitioning by date for large historical datasets. 
